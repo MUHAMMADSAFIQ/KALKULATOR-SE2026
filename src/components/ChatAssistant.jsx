@@ -75,32 +75,21 @@ export default function ChatAssistant() {
     setIsLoading(true);
 
     try {
-      // Build prompt in Zephyr format
-      let prompt = `<|system|>\n${SYSTEM_PROMPT}</s>\n`;
-      for (const msg of newMessages) {
-        if (msg.role === 'user') {
-          prompt += `<|user|>\n${msg.content}</s>\n`;
-        } else {
-          prompt += `<|assistant|>\n${msg.content}</s>\n`;
-        }
-      }
-      prompt += `<|assistant|>\n`;
+      const chatMessages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...newMessages.map(msg => ({ role: msg.role, content: msg.content }))
+      ];
 
-      const result = await hfRef.current.textGeneration({
+      const response = await hfRef.current.chatCompletion({
         model: 'HuggingFaceH4/zephyr-7b-beta',
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 400,
-          temperature: 0.7,
-          return_full_text: false,
-          do_sample: true,
-        }
+        messages: chatMessages,
+        max_tokens: 400,
+        temperature: 0.7,
+        provider: 'hf-inference',
       });
 
-      let reply = result.generated_text || '';
-      // Clean up: remove trailing special tokens
-      reply = reply.replace(/<\|.*?\|>/g, '').replace(/<\/s>/g, '').trim();
-      
+      let reply = response.choices?.[0]?.message?.content || '';
+      reply = reply.trim();
       if (!reply) reply = 'Maaf, saya tidak bisa menjawab saat ini. Coba lagi.';
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
 
