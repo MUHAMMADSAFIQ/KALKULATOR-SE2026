@@ -60,7 +60,7 @@ h1, h2, h3, h4, h5, h6 {
 .app-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-sm) var(--spacing-xs);
+  padding: var(--spacing-md) var(--spacing-sm);
 }
 
 @media (min-width: 768px) {
@@ -90,22 +90,13 @@ h1, h2, h3, h4, h5, h6 {
 
 .grid-layout {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-sm);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-md);
 }
 
 @media (min-width: 768px) {
   .grid-layout {
     gap: var(--spacing-lg);
-  }
-  .grid-layout {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .grid-layout {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 
