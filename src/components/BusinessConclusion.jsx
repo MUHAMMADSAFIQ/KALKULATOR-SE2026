@@ -20,16 +20,48 @@ export default function BusinessConclusion({
         📊 Kesimpulan Akhir (Ringkasan Total)
       </h3>
 
-      <div style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-primary)' }}>
-        <p style={{ color: 'var(--text-primary)', lineHeight: '1.6', fontSize: '0.95rem' }}>
-          <strong>Kalimat Konfirmasi:</strong><br />
-          "Berdasarkan hasil perhitungan atas nama Bapak/Ibu <strong>{namaResponden || '...'}</strong> untuk <strong>{namaUsaha || 'usaha ini'}</strong>, dengan rincian biaya operasional berupa 
-          {validExpenses.length > 0 ? validExpenses.map((e, idx, arr) => (
-            <span key={idx}> <em>{e.name}</em> sebesar <strong>{formatCurrency(e.value)}</strong>{idx === arr.length - 1 ? ', ' : ', '}</span>
-          )) : <span> biaya lainnya, </span>}
-          maka didapatkan total pengeluaran/modal tahunan sebesar <strong>{formatCurrency(totalExpense)}</strong> dan total pendapatan/omset kotor tahunan sebesar <strong>{formatCurrency(totalIncome)}</strong>. 
-          Hasil perhitungan laba bersih adalah <strong>{formatCurrency(netProfitTahunan)}</strong> per tahun, atau rata-rata setara dengan <strong>{formatCurrency(labaBulan)}</strong> per bulan. Apakah perhitungan ini sudah sesuai dengan kondisi di lapangan?"
-        </p>
+      <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-primary)' }}>
+        <div style={{ color: 'var(--text-primary)', lineHeight: '1.6', fontSize: '0.95rem' }}>
+          <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)' }}>Kalimat Konfirmasi:</strong>
+          <p style={{ marginBottom: '1rem' }}>
+            Berdasarkan hasil perhitungan atas nama Bapak/Ibu <strong>{namaResponden || '...'}</strong> untuk <strong>{namaUsaha || 'usaha ini'}</strong>, diperoleh rincian sebagai berikut:
+          </p>
+          
+          <div style={{ marginBottom: '1rem', paddingLeft: '1rem' }}>
+            <strong style={{ display: 'block', marginBottom: '0.3rem' }}>Rincian Pengeluaran/Biaya Operasional:</strong>
+            <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', color: 'var(--text-secondary)' }}>
+              {validExpenses.length > 0 ? (
+                validExpenses.map((e, idx) => (
+                  <li key={idx} style={{ marginBottom: '0.2rem' }}>
+                    {e.name}: <strong>{formatCurrency(e.value)}</strong>
+                  </li>
+                ))
+              ) : (
+                <li>Modal Operasional Global: <strong>{formatCurrency(totalExpense)}</strong></li>
+              )}
+            </ul>
+          </div>
+
+          <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '4px', marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <span>Total Pengeluaran Tahunan:</span>
+              <strong style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpense)}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+              <span>Total Pendapatan Kotor Tahunan:</span>
+              <strong style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>Hasil Laba Bersih Tahunan:</span>
+              <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}>{formatCurrency(netProfitTahunan)}</strong>
+            </div>
+          </div>
+          
+          <p style={{ fontStyle: 'italic', fontWeight: 'bold' }}>
+            Maka rata-rata laba bersih per bulan setara dengan <span style={{ color: labaBulan >= 0 ? 'var(--success)' : 'var(--danger)', fontSize: '1.1rem' }}>{formatCurrency(labaBulan)}</span>. <br/>
+            Apakah perhitungan ini sudah sesuai dengan kondisi di lapangan?
+          </p>
+        </div>
       </div>
       
       <div className="grid-layout" style={{ gap: '1rem', marginBottom: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
