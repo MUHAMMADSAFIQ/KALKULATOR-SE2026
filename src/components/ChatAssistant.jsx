@@ -15,7 +15,7 @@ export default function ChatAssistant() {
 
   // Load API Key from local storage on mount
   useEffect(() => {
-    const savedKey = localStorage.getItem('gemini_api_key');
+    const savedKey = localStorage.getItem('hf_api_key');
     if (savedKey) {
       setApiKey(savedKey);
     }
@@ -40,7 +40,7 @@ export default function ChatAssistant() {
     e.preventDefault();
     const key = e.target.apiKey.value.trim();
     if (key) {
-      localStorage.setItem('gemini_api_key', key);
+      localStorage.setItem('hf_api_key', key);
       setApiKey(key);
       setShowApiKeyModal(false);
       setIsOpen(true);
@@ -49,7 +49,7 @@ export default function ChatAssistant() {
 
   const clearApiKey = () => {
     if (window.confirm("Hapus API Key dari perangkat ini?")) {
-      localStorage.removeItem('gemini_api_key');
+      localStorage.removeItem('hf_api_key');
       setApiKey('');
       setIsOpen(false);
     }
@@ -68,34 +68,46 @@ export default function ChatAssistant() {
     setIsLoading(true);
 
     try {
-      // Map messages to Gemini format
-      const geminiContents = newMessages.map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-      }));
-
-      const payload = {
-        systemInstruction: {
-          parts: [{ text: 'Anda adalah asisten pintar untuk membantu petugas sensus ekonomi BPS 2026. Jawab dengan ringkas, ramah, dan profesional. Fokus membantu klasifikasi KBLI dan mengevaluasi kewajaran data/pengeluaran.' }]
+      // Build OpenAI-compatible messages array with system prompt
+      const apiMessages = [
+        {
+          role: 'system',
+          content: `Anda adalah asisten pintar untuk petugas Sensus Ekonomi BPS 2026 di Indonesia. 
+Tugas Anda:
+- Membantu klasifikasi kode KBLI (Klasifikasi Baku Lapangan Usaha Indonesia)
+- Mengevaluasi kewajaran data keuangan usaha (omset, laba, biaya operasional)
+- Menjelaskan konsep-konsep survei ekonomi BPS
+- Membantu perhitungan dan probing data usaha
+- Menjawab pertanyaan seputar sensus ekonomi 2026
+Jawab dengan ringkas, ramah, dan profesional dalam Bahasa Indonesia. Gunakan format poin jika perlu.`
         },
-        contents: geminiContents
-      };
+        ...newMessages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        }))
+      ];
 
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      const response = await fetch('https://router.huggingface.co/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          model: 'prism-ml/Ternary-Bonsai-27B-gguf:together',
+          messages: apiMessages,
+          max_tokens: 1024,
+          temperature: 0.7
+        })
       });
 
       const data = await response.json();
       
-      if (response.ok && data.candidates && data.candidates.length > 0) {
-        const reply = data.candidates[0].content.parts[0].text;
+      if (response.ok && data.choices && data.choices.length > 0) {
+        const reply = data.choices[0].message.content;
         setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
       } else {
-        throw new Error(data.error?.message || 'Gagal merespons (Cek API Key Anda)');
+        throw new Error(data.error?.message || 'Gagal merespons. Pastikan HF Token Anda valid.');
       }
     } catch (error) {
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ Error: ${error.message}` }]);
@@ -119,9 +131,12 @@ export default function ChatAssistant() {
       {showApiKeyModal && (
         <div className="modal-overlay no-print">
           <div className="glass-card modal-content" style={{ width: '90%', maxWidth: '400px', padding: '1.5rem', background: 'var(--bg-primary)' }}>
-            <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem' }}>🔑 Setup Gemini API Key</h3>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              Untuk menggunakan Asisten AI, masukkan API Key Gemini Anda. Key akan disimpan dengan aman di <i>Local Storage</i> browser Anda.
+            <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem' }}>🔑 Setup Hugging Face Token</h3>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+              Untuk menggunakan Asisten AI, masukkan <strong>Hugging Face Token</strong> Anda. Token akan disimpan dengan aman di <i>Local Storage</i> browser Anda.
+            </p>
+            <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', opacity: 0.7 }}>
+              Dapatkan token gratis di <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-primary)' }}>huggingface.co/settings/tokens</a>
             </p>
             <form onSubmit={saveApiKey}>
               <div className="input-group">
@@ -129,7 +144,7 @@ export default function ChatAssistant() {
                   name="apiKey"
                   type="password"
                   className="input-field" 
-                  placeholder="AIzaSy..."
+                  placeholder="hf_..."
                   required
                 />
               </div>
@@ -148,7 +163,7 @@ export default function ChatAssistant() {
           <div className="chat-header">
             <div>
               <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>🤖 AI Assistant Sensus</h3>
-              <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>Online (Gemini 1.5 Flash)</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>Online (Ternary-Bonsai-27B)</span>
             </div>
             <button onClick={clearApiKey} title="Hapus API Key" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>
               ⚙️
