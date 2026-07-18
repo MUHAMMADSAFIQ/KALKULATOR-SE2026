@@ -14,6 +14,7 @@ import MonthlyExpenses from './components/MonthlyExpenses';
 import YearlyExpenses from './components/YearlyExpenses';
 import ArchiveTab from './components/ArchiveTab';
 import ChatAssistant from './components/ChatAssistant';
+import QuickCalculator from './components/QuickCalculator';
 import { formatCurrency } from './utils';
 
 function App() {
@@ -91,9 +92,10 @@ function App() {
             {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator />}
             {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator />}
             {activeKbli?.id === 'warung' && <WarungCalculator />}
+            {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} />}
             
             {/* Fallback untuk KBLI lainnya */}
-            {(!['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung'].includes(activeKbli?.id)) && (
+            {(!['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung', 'kilat'].includes(activeKbli?.id)) && (
               <GenericBusinessCalculator activeKbli={activeKbli} title={activeKbli?.name || "Kalkulator Usaha Umum"} />
             )}
 

@@ -62,7 +62,8 @@ export default function SearchKbli({ onSelectUsaha }) {
     { id: 's_pijat', category: 'S', name: 'Jasa Pijat / Spa / Refleksi', code: '961' },
 
     // --- SAPU JAGAT ---
-    { id: 'umum', category: 'U', name: 'Usaha Lainnya (Gunakan Kalkulator Umum)', code: '00000' },
+    { id: 'umum', category: 'U', name: 'Usaha Lainnya (Kalkulator Rinci)', code: '00000' },
+    { id: 'kilat', category: 'U', name: '⚡ Kalkulator Kilat (Hanya Input Pemasukan & Pengeluaran Global)', code: '00001' },
   ];
 
   const filteredData = kbliData.filter(item => 
