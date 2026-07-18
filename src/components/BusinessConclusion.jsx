@@ -7,9 +7,13 @@ export default function BusinessConclusion({
   totalIncome, 
   totalExpense, 
   netProfitTahunan,
-  expenseDetails = []
+  expenseDetails = [],
+  tahunBerdiri = '<=2025',
+  bulanBerdiri = 1
 }) {
-  const labaBulan = netProfitTahunan / 12;
+  const labaBulan = netProfitTahunan / (tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12);
+  const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
+  const namaBulan = ["", "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
   // Filter only valid positive expenses
   const validExpenses = expenseDetails.filter(e => e && e.value > 0);
@@ -23,6 +27,13 @@ export default function BusinessConclusion({
       <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', borderLeft: '4px solid var(--accent-primary)' }}>
         <div style={{ color: 'var(--text-primary)', lineHeight: '1.6', fontSize: '0.95rem' }}>
           <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)' }}>Kalimat Konfirmasi:</strong>
+          
+          {tahunBerdiri === '2026' && (
+            <div style={{ background: 'rgba(245, 158, 11, 0.1)', borderLeft: '4px solid var(--warning)', padding: '0.8rem', marginBottom: '1rem', borderRadius: '4px', color: 'var(--text-primary)' }}>
+              ⚠️ Mengingat usaha ini baru dimulai pada <strong>{namaBulan[bulanBerdiri]} 2026</strong> (berjalan selama {bulanOperasi} bulan di tahun ini), maka perhitungan totalnya disesuaikan.
+            </div>
+          )}
+
           <p style={{ marginBottom: '1rem' }}>
             Berdasarkan hasil perhitungan atas nama Bapak/Ibu <strong>{namaResponden || '...'}</strong> untuk <strong>{namaUsaha || 'usaha ini'}</strong>, diperoleh rincian sebagai berikut:
           </p>
@@ -44,15 +55,15 @@ export default function BusinessConclusion({
 
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '4px', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-              <span>Total Pengeluaran Tahunan:</span>
+              <span>Total Pengeluaran ({bulanOperasi} bln):</span>
               <strong style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpense)}</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
-              <span>Total Pendapatan Kotor Tahunan:</span>
+              <span>Total Pendapatan Kotor ({bulanOperasi} bln):</span>
               <strong style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</strong>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span>Hasil Laba Bersih Tahunan:</span>
+              <span>Hasil Laba Bersih ({bulanOperasi} bln):</span>
               <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}>{formatCurrency(netProfitTahunan)}</strong>
             </div>
           </div>

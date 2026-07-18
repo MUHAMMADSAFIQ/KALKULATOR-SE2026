@@ -4,8 +4,13 @@ import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
+import TahunBerdiriSelector from './TahunBerdiriSelector';
 
 export default function AirIsiUlangCalculator({ initialData, onSaved }) {
+  const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
+  const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
+  const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
+
   const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     upahGaji: 0,
     airBaku: 0,
@@ -43,6 +48,7 @@ export default function AirIsiUlangCalculator({ initialData, onSaved }) {
       <div className="card-header" style={{ borderBottomColor: '#0ea5e9' }}>
         <h2 className="card-title" style={{ color: '#0ea5e9' }}>💧 Kalkulator Usaha Air Isi Ulang Galon</h2>
       </div>
+      <TahunBerdiriSelector tahunBerdiri={tahunBerdiri} setTahunBerdiri={setTahunBerdiri} bulanBerdiri={bulanBerdiri} setBulanBerdiri={setBulanBerdiri} />
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pengeluaran */}

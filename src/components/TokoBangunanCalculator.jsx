@@ -4,8 +4,13 @@ import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
+import TahunBerdiriSelector from './TahunBerdiriSelector';
 
 export default function TokoBangunanCalculator({ initialData, onSaved }) {
+  const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
+  const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
+  const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
+
   const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     upahGaji: 0,
     biayaProduksi: 0, // Pembelian barang dagangan
@@ -34,6 +39,7 @@ export default function TokoBangunanCalculator({ initialData, onSaved }) {
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
         <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}>🧱 Kalkulator Usaha Toko Bangunan</h2>
       </div>
+      <TahunBerdiriSelector tahunBerdiri={tahunBerdiri} setTahunBerdiri={setTahunBerdiri} bulanBerdiri={bulanBerdiri} setBulanBerdiri={setBulanBerdiri} />
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pengeluaran */}

@@ -5,8 +5,13 @@ import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
+import TahunBerdiriSelector from './TahunBerdiriSelector';
 
 export default function GenericBusinessCalculator({ activeKbli, namaResponden, title = "Usaha Umum / Lainnya" , initialData, onSaved }) {
+  const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
+  const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
+  const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
+
   // Pengeluaran Umum
   const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     gaji: 0,
@@ -54,7 +59,7 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
       total_pengeluaran: defaultTotalExpense,
       labaBersihBulan: Math.round(defaultNetTahunan / 12),
       labaBersihTahun: defaultNetTahunan,
-      rawState: getRawState()
+      rawState: { ...getRawState(), tahunBerdiri, bulanBerdiri }
     };
   };
 
@@ -73,6 +78,7 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
       <div className="card-header" style={{ borderBottomColor: '#10b981' }}>
         <h2 className="card-title" style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Briefcase size={20} /> Kalkulator Usaha: {title}</h2>
       </div>
+      <TahunBerdiriSelector tahunBerdiri={tahunBerdiri} setTahunBerdiri={setTahunBerdiri} bulanBerdiri={bulanBerdiri} setBulanBerdiri={setBulanBerdiri} />
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pengeluaran */}

@@ -4,8 +4,13 @@ import CurrencyInput from './CurrencyInput';
 import { formatCurrency, saveToArchive } from '../utils';
 import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
+import TahunBerdiriSelector from './TahunBerdiriSelector';
 
 export default function QuickCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
+  const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
+  const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
+  const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
+
   const [periode, setPeriode] = useState(initialData?.rawState?.periode ?? 'Bulan'); // 'Hari', 'Minggu', 'Bulan'
   const [pemasukan, setPemasukan] = useState(initialData?.rawState?.pemasukan ?? 0);
   const [pengeluaran, setPengeluaran] = useState(initialData?.rawState?.pengeluaran ?? 0);
@@ -19,7 +24,7 @@ export default function QuickCalculator({ activeKbli, namaResponden , initialDat
   if (periode === 'Minggu') labaBulan = labaBersihPeriode * 4;
   if (periode === 'Bulan') labaBulan = labaBersihPeriode;
   
-  const labaTahun = labaBulan * 12;
+  const labaTahun = labaBulan * bulanOperasi;
 
   
   const getRawState = () => ({ periode, pemasukan, pengeluaran });
@@ -41,7 +46,7 @@ export default function QuickCalculator({ activeKbli, namaResponden , initialDat
       total_pengeluaran: defaultTotalExpense,
       labaBersihBulan: Math.round(defaultNetTahunan / 12),
       labaBersihTahun: defaultNetTahunan,
-      rawState: getRawState()
+      rawState: { ...getRawState(), tahunBerdiri, bulanBerdiri }
     };
   };
 
@@ -60,6 +65,7 @@ export default function QuickCalculator({ activeKbli, namaResponden , initialDat
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
         <h2 className="card-title" style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Zap size={20} /> Kalkulator Kilat (Sederhana)</h2>
       </div>
+      <TahunBerdiriSelector tahunBerdiri={tahunBerdiri} setTahunBerdiri={setTahunBerdiri} bulanBerdiri={bulanBerdiri} setBulanBerdiri={setBulanBerdiri} />
       
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
         Gunakan kalkulator ini untuk wawancara cepat. Cukup tanyakan total pemasukan dan pengeluaran secara garis besar.

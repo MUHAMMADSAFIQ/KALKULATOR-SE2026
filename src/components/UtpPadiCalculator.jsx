@@ -5,8 +5,13 @@ import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
+import TahunBerdiriSelector from './TahunBerdiriSelector';
 
 export default function UtpPadiCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
+  const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
+  const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
+  const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
+
   // Lahan
   const [luasUbin, setLuasUbin] = useState(initialData?.rawState?.luasUbin ?? '');
   const [luasMeter, setLuasMeter] = useState(initialData?.rawState?.luasMeter ?? '');
@@ -101,7 +106,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
       total_pengeluaran: defaultTotalExpense,
       labaBersihBulan: Math.round(defaultNetTahunan / 12),
       labaBersihTahun: defaultNetTahunan,
-      rawState: getRawState()
+      rawState: { ...getRawState(), tahunBerdiri, bulanBerdiri }
     };
   };
 
@@ -120,6 +125,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
         <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}><Wheat size={24} color="var(--accent-primary)" /> Kalkulator UTP Padi Sawah</h2>
       </div>
+      <TahunBerdiriSelector tahunBerdiri={tahunBerdiri} setTahunBerdiri={setTahunBerdiri} bulanBerdiri={bulanBerdiri} setBulanBerdiri={setBulanBerdiri} />
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         <div className="input-group">
