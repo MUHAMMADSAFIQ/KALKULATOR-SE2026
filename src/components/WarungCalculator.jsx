@@ -41,20 +41,6 @@ export default function WarungCalculator({ initialData, onSaved }) {
       </div>
       
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
-        {/* Kolom Pendapatan */}
-        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Pemasukan (Pendapatan)</h3>
-          <CurrencyInput label="27.a - Total Penjualan Barang" value={income.penjualanBarang} onChange={(v) => updateIncome('penjualanBarang', v)} />
-          <CurrencyInput label="27.b - Pendapatan Lain (Kardus, Konsinyasi)" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
-          
-          <div className="result-box" style={{ background: 'rgba(16, 185, 129, 0.2)', borderColor: 'var(--success)' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
-            <span className="result-value" style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</span>
-          </div>
-          
-          <ProbingInput title="Estimasi Probing Omset (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
-        </div>
-
         {/* Kolom Pengeluaran */}
         <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
           <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingDown size={18} /> Pengeluaran (Biaya)</h3>
@@ -72,6 +58,20 @@ export default function WarungCalculator({ initialData, onSaved }) {
           <ProbingInput title="Estimasi Probing Biaya Belanja (Tahunan)" type="expense" onChange={setAnnualModalProbing} />
         </div>
       </div>
+        {/* Kolom Pendapatan */}
+        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Pemasukan (Pendapatan)</h3>
+          <CurrencyInput label="27.a - Total Penjualan Barang" value={income.penjualanBarang} onChange={(v) => updateIncome('penjualanBarang', v)} />
+          <CurrencyInput label="27.b - Pendapatan Lain (Kardus, Konsinyasi)" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
+          
+          <div className="result-box" style={{ background: 'rgba(16, 185, 129, 0.2)', borderColor: 'var(--success)' }}>
+            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
+            <span className="result-value" style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</span>
+          </div>
+          
+          <ProbingInput title="Estimasi Probing Omset (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
+        </div>
+
 
       {/* Ringkasan Laba Bersih */}
       <div className="summary-card" style={{ marginTop: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md)' }}>

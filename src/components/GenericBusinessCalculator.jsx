@@ -75,20 +75,6 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
       </div>
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
-        {/* Kolom Pemasukan */}
-        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: 'var(--success)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Total Pendapatan</h3>
-          <CurrencyInput label="Omset / Penjualan Utama" value={income.omsetUtama} onChange={(v) => updateIncome('omsetUtama', v)} />
-          <CurrencyInput label="Pendapatan Sampingan / Lainnya" value={income.pendapatanLain} onChange={(v) => updateIncome('pendapatanLain', v)} />
-          
-          <div className="result-box" style={{ background: 'rgba(16, 185, 129, 0.2)', borderColor: 'var(--success)', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pemasukan</span>
-            <span className="result-value" style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</span>
-          </div>
-          
-          <ProbingInput title="Estimasi Probing Omset (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
-        </div>
-
         {/* Kolom Pengeluaran */}
         <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
           <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingDown size={18} /> Total Biaya Operasional</h3>
@@ -107,6 +93,20 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
           <ProbingInput title="Estimasi Probing Biaya Operasional (Tahunan)" type="expense" onChange={setAnnualModalProbing} />
         </div>
       </div>
+        {/* Kolom Pemasukan */}
+        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <h3 style={{ color: 'var(--success)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Total Pendapatan</h3>
+          <CurrencyInput label="Omset / Penjualan Utama" value={income.omsetUtama} onChange={(v) => updateIncome('omsetUtama', v)} />
+          <CurrencyInput label="Pendapatan Sampingan / Lainnya" value={income.pendapatanLain} onChange={(v) => updateIncome('pendapatanLain', v)} />
+          
+          <div className="result-box" style={{ background: 'rgba(16, 185, 129, 0.2)', borderColor: 'var(--success)', marginTop: '2rem' }}>
+            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pemasukan</span>
+            <span className="result-value" style={{ color: 'var(--success)' }}>{formatCurrency(totalIncome)}</span>
+          </div>
+          
+          <ProbingInput title="Estimasi Probing Omset (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
+        </div>
+
 
       <div className="summary-card" style={{ marginTop: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md)' }}>
         <div style={{ textAlign: 'center' }}>

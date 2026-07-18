@@ -45,6 +45,32 @@ export default function AirIsiUlangCalculator({ initialData, onSaved }) {
       </div>
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
+        {/* Kolom Pengeluaran */}
+        <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 3. Pengeluaran (Rincian 26)</h3>
+          
+          <CurrencyInput label="26.a - Upah dan Gaji Kurir / Karyawan" value={expenses.upahGaji} onChange={(v) => updateExpense('upahGaji', v)} />
+          
+          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.b Biaya Produksi</h4>
+          <CurrencyInput label="Air Baku (Truk Tangki)" value={expenses.airBaku} onChange={(v) => updateExpense('airBaku', v)} />
+          <CurrencyInput label="Tutup Galon & Tisu Galon" value={expenses.tutupTisuGalon} onChange={(v) => updateExpense('tutupTisuGalon', v)} />
+          <CurrencyInput label="Penggantian Filter / Karbon Aktif" value={expenses.filterKarbon} onChange={(v) => updateExpense('filterKarbon', v)} />
+          
+          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.d Biaya Operasional</h4>
+          <CurrencyInput label="Listrik Pompa & Lampu UV" value={expenses.listrikPompa} onChange={(v) => updateExpense('listrikPompa', v)} />
+          <CurrencyInput label="BBM Motor Pengantar" value={expenses.bbmMotor} onChange={(v) => updateExpense('bbmMotor', v)} />
+
+          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.e Biaya Non-Operasional</h4>
+          <CurrencyInput label="Pajak, Bunga Pinjaman, dll" value={expenses.biayaNonOperasional} onChange={(v) => updateExpense('biayaNonOperasional', v)} />
+
+          <div className="result-box" style={{ background: 'rgba(239, 68, 68, 0.2)', borderColor: 'var(--danger)', marginTop: '2rem' }}>
+            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pengeluaran</span>
+            <span className="result-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpense)}</span>
+          </div>
+          
+          <ProbingInput title="Estimasi Probing Pengeluaran (Tahunan)" type="expense" onChange={setAnnualModalProbing} />
+        </div>
+      </div>
         {/* Kolom Pemasukan */}
         <div style={{ background: 'rgba(14, 165, 233, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(14, 165, 233, 0.2)' }}>
           <h3 style={{ color: '#0ea5e9', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 2. Pendapatan / Omzet</h3>
@@ -78,32 +104,6 @@ export default function AirIsiUlangCalculator({ initialData, onSaved }) {
           <ProbingInput title="Estimasi Probing Pendapatan (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
         </div>
 
-        {/* Kolom Pengeluaran */}
-        <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 3. Pengeluaran (Rincian 26)</h3>
-          
-          <CurrencyInput label="26.a - Upah dan Gaji Kurir / Karyawan" value={expenses.upahGaji} onChange={(v) => updateExpense('upahGaji', v)} />
-          
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.b Biaya Produksi</h4>
-          <CurrencyInput label="Air Baku (Truk Tangki)" value={expenses.airBaku} onChange={(v) => updateExpense('airBaku', v)} />
-          <CurrencyInput label="Tutup Galon & Tisu Galon" value={expenses.tutupTisuGalon} onChange={(v) => updateExpense('tutupTisuGalon', v)} />
-          <CurrencyInput label="Penggantian Filter / Karbon Aktif" value={expenses.filterKarbon} onChange={(v) => updateExpense('filterKarbon', v)} />
-          
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.d Biaya Operasional</h4>
-          <CurrencyInput label="Listrik Pompa & Lampu UV" value={expenses.listrikPompa} onChange={(v) => updateExpense('listrikPompa', v)} />
-          <CurrencyInput label="BBM Motor Pengantar" value={expenses.bbmMotor} onChange={(v) => updateExpense('bbmMotor', v)} />
-
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.e Biaya Non-Operasional</h4>
-          <CurrencyInput label="Pajak, Bunga Pinjaman, dll" value={expenses.biayaNonOperasional} onChange={(v) => updateExpense('biayaNonOperasional', v)} />
-
-          <div className="result-box" style={{ background: 'rgba(239, 68, 68, 0.2)', borderColor: 'var(--danger)', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pengeluaran</span>
-            <span className="result-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpense)}</span>
-          </div>
-          
-          <ProbingInput title="Estimasi Probing Pengeluaran (Tahunan)" type="expense" onChange={setAnnualModalProbing} />
-        </div>
-      </div>
 
       <div className="summary-card" style={{ marginTop: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md)' }}>
         <div style={{ textAlign: 'center' }}>

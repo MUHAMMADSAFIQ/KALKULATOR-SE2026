@@ -117,7 +117,7 @@ export default function QuickCalculator({ activeKbli, namaResponden , initialDat
 
           
       <>
-        <BusinessConclusion totalIncome={income} totalExpense={expense} netProfitTahunan={labaTahun} />
+        <BusinessConclusion namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'}  totalIncome={income} totalExpense={expense} netProfitTahunan={labaTahun}  expenseDetails={[{name: 'Pengeluaran/Biaya Operasional', value: parseFloat(pengeluaran || 0) * (periode === 'Hari' ? 30 : (periode === 'Minggu' ? 4 : 1)) }]} />
         <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
         {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
       </>

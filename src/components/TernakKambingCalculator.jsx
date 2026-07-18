@@ -53,22 +53,6 @@ export default function TernakKambingCalculator({ initialData, onSaved }) {
       </div>
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
-        {/* Kolom Pemasukan */}
-        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27.a Nilai Barang dan Jasa</h3>
-          <CurrencyInput label="Penjualan Kambing Siap Potong" value={income.penjualanUtama} onChange={(v) => updateIncome('penjualanUtama', v)} />
-          <CurrencyInput label="Penjualan Anakan (Cempe)" value={income.penjualanAnakan} onChange={(v) => updateIncome('penjualanAnakan', v)} />
-          <CurrencyInput label="Penjualan Kotoran/Pupuk Kandang" value={income.penjualanKotoran} onChange={(v) => updateIncome('penjualanKotoran', v)} />
-          <CurrencyInput label="Pendapatan Lainnya" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
-          
-          <div className="result-box" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
-            <span className="result-value" style={{ color: 'var(--accent-primary)' }}>{formatCurrency(totalIncome)}</span>
-          </div>
-          
-          <ProbingInput title="Estimasi Probing Pendapatan (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
-        </div>
-
         {/* Kolom Pengeluaran */}
         <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
           <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 Pengeluaran Usaha Peternakan</h3>
@@ -106,6 +90,22 @@ export default function TernakKambingCalculator({ initialData, onSaved }) {
           <ProbingInput title="Estimasi Probing Pengeluaran (Tahunan)" type="expense" onChange={setAnnualModalProbing} />
         </div>
       </div>
+        {/* Kolom Pemasukan */}
+        <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27.a Nilai Barang dan Jasa</h3>
+          <CurrencyInput label="Penjualan Kambing Siap Potong" value={income.penjualanUtama} onChange={(v) => updateIncome('penjualanUtama', v)} />
+          <CurrencyInput label="Penjualan Anakan (Cempe)" value={income.penjualanAnakan} onChange={(v) => updateIncome('penjualanAnakan', v)} />
+          <CurrencyInput label="Penjualan Kotoran/Pupuk Kandang" value={income.penjualanKotoran} onChange={(v) => updateIncome('penjualanKotoran', v)} />
+          <CurrencyInput label="Pendapatan Lainnya" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
+          
+          <div className="result-box" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)', marginTop: '2rem' }}>
+            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
+            <span className="result-value" style={{ color: 'var(--accent-primary)' }}>{formatCurrency(totalIncome)}</span>
+          </div>
+          
+          <ProbingInput title="Estimasi Probing Pendapatan (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
+        </div>
+
 
       <div className="summary-card" style={{ marginTop: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md)' }}>
         <div style={{ textAlign: 'center' }}>
