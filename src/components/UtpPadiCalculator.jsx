@@ -5,7 +5,30 @@ import { formatCurrency } from '../utils';
 
 export default function UtpPadiCalculator() {
   const [luasUbin, setLuasUbin] = useState('');
+  const [luasMeter, setLuasMeter] = useState('');
   const [frekuensiPanen, setFrekuensiPanen] = useState(2);
+  
+  const UBIN_TO_M2 = 14.0625;
+
+  const handleUbinChange = (e) => {
+    const ubin = e.target.value;
+    setLuasUbin(ubin);
+    if (ubin) {
+      setLuasMeter((parseFloat(ubin) * UBIN_TO_M2).toFixed(2));
+    } else {
+      setLuasMeter('');
+    }
+  };
+
+  const handleMeterChange = (e) => {
+    const m2 = e.target.value;
+    setLuasMeter(m2);
+    if (m2) {
+      setLuasUbin((parseFloat(m2) / UBIN_TO_M2).toFixed(2));
+    } else {
+      setLuasUbin('');
+    }
+  };
   
   // Pengeluaran
   const [expenses, setExpenses] = useState({
@@ -40,24 +63,62 @@ export default function UtpPadiCalculator() {
       </div>
 
       <div style={{ marginBottom: '1.5rem', display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
-        <div className="input-group" style={{ flex: '1 1 200px' }}>
-          <label>Luas Lahan Garapan (Dalam Ubin)</label>
+        <div className="input-group" style={{ flex: '1 1 150px' }}>
+          <label>Luas (Ubin)</label>
           <input 
             type="number" 
             className="input-field" 
             placeholder="Misal: 100"
             value={luasUbin}
-            onChange={(e) => setLuasUbin(e.target.value)}
+            onChange={handleUbinChange}
+            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const inputs = Array.from(document.querySelectorAll('input:not([disabled])'));
+                const index = inputs.indexOf(e.target);
+                if (index > -1 && index < inputs.length - 1) inputs[index + 1].focus();
+              }
+            }}
           />
         </div>
-        <div className="input-group" style={{ flex: '1 1 200px' }}>
-          <label>Frekuensi Panen Setahun</label>
+        <div className="input-group" style={{ flex: '1 1 150px' }}>
+          <label>Konversi Luas (m²)</label>
+          <input 
+            type="number" 
+            className="input-field" 
+            placeholder="Otomatis / Manual"
+            value={luasMeter}
+            onChange={handleMeterChange}
+            onFocus={(e) => e.target.select()}
+            style={{ background: 'rgba(132, 204, 22, 0.1)', borderColor: '#84cc16' }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const inputs = Array.from(document.querySelectorAll('input:not([disabled])'));
+                const index = inputs.indexOf(e.target);
+                if (index > -1 && index < inputs.length - 1) inputs[index + 1].focus();
+              }
+            }}
+          />
+        </div>
+        <div className="input-group" style={{ flex: '1 1 150px' }}>
+          <label>Panen Setahun</label>
           <input 
             type="number" 
             className="input-field" 
             placeholder="Misal: 2 atau 3"
             value={frekuensiPanen}
             onChange={(e) => setFrekuensiPanen(e.target.value || 0)}
+            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                const inputs = Array.from(document.querySelectorAll('input:not([disabled])'));
+                const index = inputs.indexOf(e.target);
+                if (index > -1 && index < inputs.length - 1) inputs[index + 1].focus();
+              }
+            }}
           />
         </div>
       </div>
@@ -126,11 +187,16 @@ export default function UtpPadiCalculator() {
             <span>Laba per Musim: {formatCurrency(netProfitMusiman)}</span>
             <span style={{ color: 'var(--accent-secondary)', fontWeight: 'bold' }}>Rata-rata Bersih Per Bulan: {formatCurrency(netProfitTahunan / 12)}</span>
           </div>
-          {luasUbin && (
-            <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
-              Hasil untuk garapan seluas {luasUbin} Ubin.
-            </p>
-          )}
+          
+          {/* Kesimpulan Manusiawi */}
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: 'var(--radius-sm)', borderLeft: '4px solid var(--accent-primary)', textAlign: 'left', fontStyle: 'italic', color: 'var(--text-primary)' }}>
+            <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
+            "Berdasarkan data yang Bapak/Ibu berikan, lahan seluas 
+            <strong style={{ color: '#84cc16' }}> {luasUbin ? `${luasUbin} ubin` : '...'} </strong> 
+            ini bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. Setelah dipotong semua biaya tanam dan buruh, perkiraan penghasilan bersih Bapak/Ibu adalah sekitar 
+            <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfitTahunan / 12)} per bulannya</strong>. 
+            Apakah kira-kira angka ini sudah sesuai dengan kenyataan sehari-hari?"
+          </div>
         </div>
       </div>
     </div>
