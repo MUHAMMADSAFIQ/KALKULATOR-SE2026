@@ -58,17 +58,21 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
     ? parseFloat(jumlahKuintal || 0) * parseFloat(hargaKuintal || 0)
     : parseFloat(pendapatanUang || 0);
 
+  // 1. Potongan Bawon (Biaya Panen 1/7 otomatis)
+  const biayaBawon = panenGabah * (1 / 7);
+  const sisaBawon = panenGabah - biayaBawon;
+
+  // 2. Bagi Hasil Lahan
+  const pendapatanKotorPenggarap = statusKepemilikan === 'Maro' 
+    ? sisaBawon * (persentaseMaro / 100) 
+    : sisaBawon;
+
+  // 3. Kurangi Modal Operasional (selain biaya panen)
   const totalExpense = modeBiaya === 'Global' 
     ? parseFloat(modalGlobal || 0) 
     : Object.values(expenses).reduce((a, b) => a + b, 0);
 
-  // Profit sebelum dibagi hasil
-  const profitKotor = panenGabah - totalExpense;
-  
-  // Profit setelah dibagi hasil (jika Maro)
-  const profitSetelahMaro = statusKepemilikan === 'Maro' 
-    ? profitKotor * (persentaseMaro / 100) 
-    : profitKotor;
+  const profitSetelahMaro = pendapatanKotorPenggarap - totalExpense;
 
   const netProfitTahunan = (profitSetelahMaro * frekuensiPanen);
 
@@ -176,9 +180,19 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             <CurrencyInput label="Total Uang Pendapatan Sekali Panen" value={pendapatanUang} onChange={setPendapatanUang} />
           )}
           
-          <div className="subtotal">
-            <span>Total Pendapatan:</span>
-            <span>{formatCurrency(panenGabah)}</span>
+          <div className="subtotal" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+              <span>Panen Kotor:</span>
+              <span>{formatCurrency(panenGabah)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--danger)' }}>
+              <span>Biaya Panen / Bawon (1/7):</span>
+              <span>- {formatCurrency(biayaBawon)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid var(--glass-border)', paddingTop: '0.5rem', marginTop: '0.2rem' }}>
+              <span>Total Bersih Panen (6/7):</span>
+              <span>{formatCurrency(sisaBawon)}</span>
+            </div>
           </div>
 
           <div className="input-group" style={{ marginTop: '1.5rem' }}>
@@ -209,7 +223,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
               <CurrencyInput label="Total Modal Sekali Tanam (Gabungan)" value={modalGlobal} onChange={setModalGlobal} />
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                *Gabungan dari biaya pupuk, obat, traktor, dan buruh tandur/panen.
+                *Gabungan biaya pupuk, obat, traktor, & buruh tanam (biaya panen sudah terpotong otomatis 1/7).
               </p>
             </div>
           ) : (
@@ -218,7 +232,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
               <CurrencyInput label="Pupuk" value={expenses.pupuk} onChange={(v) => updateExpense('pupuk', v)} />
               <CurrencyInput label="Obat / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
               <CurrencyInput label="Sewa Traktor / Bajak" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
-              <CurrencyInput label="Upah Buruh (Tanam & Panen)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
+              <CurrencyInput label="Upah Buruh Tanam (Panen Otomatis 1/7)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
               <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
             </div>
           )}
