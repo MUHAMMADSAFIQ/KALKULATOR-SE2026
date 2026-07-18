@@ -4,10 +4,15 @@ import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 
 export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
+  // Lahan
   const [luasUbin, setLuasUbin] = useState('');
   const [luasMeter, setLuasMeter] = useState('');
   const [frekuensiPanen, setFrekuensiPanen] = useState(2);
   
+  // Status Kepemilikan (Sawah Sendiri / Maro)
+  const [statusKepemilikan, setStatusKepemilikan] = useState('Sendiri'); // 'Sendiri', 'Maro'
+  const [persentaseMaro, setPersentaseMaro] = useState(50); // Bagian penggarap (default 50%)
+
   const UBIN_TO_M2 = 14.0625;
 
   const handleUbinChange = (e) => {
@@ -30,7 +35,9 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
     }
   };
   
-  // Pengeluaran
+  // Mode Input Biaya Modal
+  const [modeBiaya, setModeBiaya] = useState('Global'); // 'Global', 'Rinci'
+  const [modalGlobal, setModalGlobal] = useState(0);
   const [expenses, setExpenses] = useState({
     benih: 0,
     pupuk: 0,
@@ -40,19 +47,30 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
     irigasi: 0,
   });
 
-  // Pemasukan
+  // Mode Input Pendapatan
+  const [modePendapatan, setModePendapatan] = useState('Kuintal'); // 'Kuintal', 'Uang'
   const [jumlahKuintal, setJumlahKuintal] = useState('');
   const [hargaKuintal, setHargaKuintal] = useState(650000);
+  const [pendapatanUang, setPendapatanUang] = useState(0);
   
-  const panenGabah = parseFloat(jumlahKuintal || 0) * parseFloat(hargaKuintal || 0);
+  // Kalkulasi
+  const panenGabah = modePendapatan === 'Kuintal' 
+    ? parseFloat(jumlahKuintal || 0) * parseFloat(hargaKuintal || 0)
+    : parseFloat(pendapatanUang || 0);
 
-  // Probing State
-  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(0);
-  const [annualModalProbing, setAnnualModalProbing] = useState(0);
+  const totalExpense = modeBiaya === 'Global' 
+    ? parseFloat(modalGlobal || 0) 
+    : Object.values(expenses).reduce((a, b) => a + b, 0);
 
-  const totalExpense = Object.values(expenses).reduce((a, b) => a + b, 0);
-  const netProfitMusiman = panenGabah - totalExpense;
-  const netProfitTahunan = (netProfitMusiman * frekuensiPanen) + annualOmsetProbing - annualModalProbing;
+  // Profit sebelum dibagi hasil
+  const profitKotor = panenGabah - totalExpense;
+  
+  // Profit setelah dibagi hasil (jika Maro)
+  const profitSetelahMaro = statusKepemilikan === 'Maro' 
+    ? profitKotor * (persentaseMaro / 100) 
+    : profitKotor;
+
+  const netProfitTahunan = (profitSetelahMaro * frekuensiPanen);
 
   const updateExpense = (key, value) => setExpenses(prev => ({ ...prev, [key]: value }));
 
@@ -62,8 +80,8 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
         <h2 className="card-title" style={{ color: '#84cc16' }}>🌾 Kalkulator UTP Padi Sawah</h2>
       </div>
 
-      <div style={{ marginBottom: '1.5rem', display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
-        <div className="input-group" style={{ flex: '1 1 150px' }}>
+      <div className="grid-layout" style={{ gap: '1rem', marginBottom: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+        <div className="input-group">
           <label>Luas (Ubin)</label>
           <input 
             type="number" 
@@ -72,108 +90,151 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             value={luasUbin}
             onChange={handleUbinChange}
             onFocus={(e) => e.target.select()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                const inputs = Array.from(document.querySelectorAll('input:not([disabled])'));
-                const index = inputs.indexOf(e.target);
-                if (index > -1 && index < inputs.length - 1) inputs[index + 1].focus();
-              }
-            }}
           />
         </div>
-        <div className="input-group" style={{ flex: '1 1 150px' }}>
+        <div className="input-group">
           <label>Konversi Luas (m²)</label>
           <input 
             type="number" 
             className="input-field" 
-            placeholder="Otomatis / Manual"
+            placeholder="Otomatis"
             value={luasMeter}
             onChange={handleMeterChange}
             onFocus={(e) => e.target.select()}
             style={{ background: 'rgba(132, 204, 22, 0.1)', borderColor: '#84cc16' }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                const inputs = Array.from(document.querySelectorAll('input:not([disabled])'));
-                const index = inputs.indexOf(e.target);
-                if (index > -1 && index < inputs.length - 1) inputs[index + 1].focus();
-              }
-            }}
-          />
-        </div>
-        <div className="input-group" style={{ flex: '1 1 150px' }}>
-          <label>Panen Setahun</label>
-          <input 
-            type="number" 
-            className="input-field" 
-            placeholder="Misal: 2 atau 3"
-            value={frekuensiPanen}
-            onChange={(e) => setFrekuensiPanen(e.target.value || 0)}
-            onFocus={(e) => e.target.select()}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                const inputs = Array.from(document.querySelectorAll('input:not([disabled])'));
-                const index = inputs.indexOf(e.target);
-                if (index > -1 && index < inputs.length - 1) inputs[index + 1].focus();
-              }
-            }}
           />
         </div>
       </div>
 
-      <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
-        {/* Kolom Pemasukan */}
-        <div style={{ background: 'rgba(132, 204, 22, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(132, 204, 22, 0.2)' }}>
-          <h3 style={{ color: '#84cc16', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 Hasil Panen (Pemasukan)</h3>
+      {/* --- STATUS KEPEMILIKAN --- */}
+      <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: 'var(--radius-sm)' }}>
+        <h4 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Status Lahan</h4>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {['Sendiri', 'Maro'].map((mode) => (
+            <button 
+              key={mode}
+              onClick={() => setStatusKepemilikan(mode)}
+              style={{ 
+                flex: 1, padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
+                background: statusKepemilikan === mode ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)',
+                color: statusKepemilikan === mode ? 'white' : 'var(--text-secondary)',
+                fontWeight: statusKepemilikan === mode ? 'bold' : 'normal',
+                transition: 'all 0.2s'
+              }}
+            >
+              {mode === 'Sendiri' ? '🌱 Sawah Sendiri' : '🤝 Bagi Hasil (Maro)'}
+            </button>
+          ))}
+        </div>
+        
+        {statusKepemilikan === 'Maro' && (
+          <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <label style={{ color: 'var(--text-secondary)', width: '200px' }}>Persentase Bagian Anda:</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+              <input 
+                type="range" 
+                min="10" max="90" step="5"
+                value={persentaseMaro}
+                onChange={(e) => setPersentaseMaro(e.target.value)}
+                style={{ flex: 1 }}
+              />
+              <span style={{ fontWeight: 'bold', color: 'var(--accent-primary)', width: '50px' }}>{persentaseMaro}%</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="grid-layout">
+        {/* KOLOM PENDAPATAN */}
+        <div className="calculation-section">
+          <div className="section-header">
+            <span className="section-icon">🌾</span>
+            <h3 className="section-title">Pendapatan (Per Panen)</h3>
+          </div>
           
-          <div className="input-group">
-            <label>Jumlah Panen Gabah (Dalam Kuintal)</label>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <button onClick={() => setModePendapatan('Kuintal')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modePendapatan === 'Kuintal' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modePendapatan === 'Kuintal' ? 'white' : 'var(--accent-primary)' }}>Input Kuintal</button>
+            <button onClick={() => setModePendapatan('Uang')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modePendapatan === 'Uang' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modePendapatan === 'Uang' ? 'white' : 'var(--accent-primary)' }}>Input Uang</button>
+          </div>
+
+          {modePendapatan === 'Kuintal' ? (
+            <>
+              <div className="input-group">
+                <label>Jumlah Gabah (Kuintal)</label>
+                <input 
+                  type="number" 
+                  className="input-field" 
+                  value={jumlahKuintal}
+                  onChange={(e) => setJumlahKuintal(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  placeholder="Misal: 15"
+                />
+              </div>
+              <CurrencyInput label="Harga per Kuintal" value={hargaKuintal} onChange={setHargaKuintal} />
+            </>
+          ) : (
+            <CurrencyInput label="Total Uang Pendapatan Sekali Panen" value={pendapatanUang} onChange={setPendapatanUang} />
+          )}
+          
+          <div className="subtotal">
+            <span>Total Pendapatan:</span>
+            <span>{formatCurrency(panenGabah)}</span>
+          </div>
+
+          <div className="input-group" style={{ marginTop: '1.5rem' }}>
+            <label>Berapa kali panen dalam setahun?</label>
             <input 
               type="number" 
-              inputMode="numeric"
               className="input-field" 
-              placeholder="Misal: 25"
-              value={jumlahKuintal}
-              onChange={(e) => setJumlahKuintal(e.target.value)}
+              value={frekuensiPanen}
+              onChange={(e) => setFrekuensiPanen(e.target.value)}
+              onFocus={(e) => e.target.select()}
             />
           </div>
-
-          <CurrencyInput label="Harga Per Kuintal (Rp)" value={hargaKuintal} onChange={setHargaKuintal} />
-          
-          <div className="result-box" style={{ background: 'rgba(132, 204, 22, 0.2)', borderColor: '#84cc16', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Penjualan (Musim Ini)</span>
-            <span className="result-value" style={{ color: '#84cc16' }}>{formatCurrency(panenGabah)}</span>
-          </div>
-
-          <hr style={{ margin: '1.5rem 0', borderColor: 'var(--glass-border)' }} />
-          
-          <ProbingInput title="Estimasi Probing Panen (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
         </div>
 
-        {/* Kolom Pengeluaran */}
-        <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 Biaya Tanam (Pengeluaran)</h3>
-          <CurrencyInput label="Benih / Bibit Padi" value={expenses.benih} onChange={(v) => updateExpense('benih', v)} />
-          <CurrencyInput label="Pupuk (Urea, NPK, dll)" value={expenses.pupuk} onChange={(v) => updateExpense('pupuk', v)} />
-          <CurrencyInput label="Obat Hama / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
-          <CurrencyInput label="Sewa Traktor / Bajak Sawah" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
-          <CurrencyInput label="Upah Buruh (Tanam & Panen)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
-          <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
-          
-          <div className="result-box" style={{ background: 'rgba(239, 68, 68, 0.2)', borderColor: 'var(--danger)' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Biaya Tanam</span>
-            <span className="result-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpense)}</span>
+        {/* KOLOM PENGELUARAN */}
+        <div className="calculation-section">
+          <div className="section-header">
+            <span className="section-icon">💸</span>
+            <h3 className="section-title">Modal / Pengeluaran (Per Panen)</h3>
           </div>
-          
-          <ProbingInput title="Estimasi Probing Biaya (Tahunan)" type="expense" onChange={setAnnualModalProbing} />
+
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <button onClick={() => setModeBiaya('Global')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modeBiaya === 'Global' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modeBiaya === 'Global' ? 'white' : 'var(--accent-primary)' }}>Input Keseluruhan</button>
+            <button onClick={() => setModeBiaya('Rinci')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modeBiaya === 'Rinci' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modeBiaya === 'Rinci' ? 'white' : 'var(--accent-primary)' }}>Input Satu-Satu</button>
+          </div>
+
+          {modeBiaya === 'Global' ? (
+            <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              <CurrencyInput label="Total Modal Sekali Tanam (Gabungan)" value={modalGlobal} onChange={setModalGlobal} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                *Gabungan dari biaya pupuk, obat, traktor, dan buruh tandur/panen.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <CurrencyInput label="Benih / Bibit" value={expenses.benih} onChange={(v) => updateExpense('benih', v)} />
+              <CurrencyInput label="Pupuk" value={expenses.pupuk} onChange={(v) => updateExpense('pupuk', v)} />
+              <CurrencyInput label="Obat / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
+              <CurrencyInput label="Sewa Traktor / Bajak" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
+              <CurrencyInput label="Upah Buruh (Tanam & Panen)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
+              <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
+            </div>
+          )}
+
+          <div className="subtotal" style={{ marginTop: '1rem', color: 'var(--danger)' }}>
+            <span>Total Modal/Biaya:</span>
+            <span>{formatCurrency(totalExpense)}</span>
+          </div>
         </div>
       </div>
 
       <div className="summary-card" style={{ marginTop: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md)' }}>
         <div style={{ textAlign: 'center' }}>
-          <span style={{ display: 'block', fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Laba Bersih Setahun (x{frekuensiPanen} Musim)</span>
+          <span style={{ display: 'block', fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+            Estimasi Pendapatan Bersih Setahun {statusKepemilikan === 'Maro' ? `(Bagian Anda: ${persentaseMaro}%)` : ''}
+          </span>
           <span style={{ 
             fontFamily: 'Outfit', 
             fontSize: '2.5rem', 
@@ -184,7 +245,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             {formatCurrency(netProfitTahunan)}
           </span>
           <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
-            <span>Laba per Musim: {formatCurrency(netProfitMusiman)}</span>
+            <span>Laba per Musim Tanam: {formatCurrency(profitSetelahMaro)}</span>
             <span style={{ color: 'var(--accent-secondary)', fontWeight: 'bold' }}>Rata-rata Bersih Per Bulan: {formatCurrency(netProfitTahunan / 12)}</span>
           </div>
           
@@ -193,7 +254,8 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
             "Berdasarkan data yang Bapak/Ibu berikan, lahan seluas 
             <strong style={{ color: '#84cc16' }}> {luasUbin ? `${luasUbin} ubin` : '...'} </strong> 
-            ini bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. Setelah dipotong semua biaya tanam dan buruh, perkiraan penghasilan bersih Bapak/Ibu adalah sekitar 
+            ini {statusKepemilikan === 'Maro' ? <strong>digarap secara bagi hasil ({persentaseMaro}%)</strong> dan : ''} bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. 
+            Setelah dipotong semua biaya modal (traktor, buruh, pupuk, dll), perkiraan penghasilan bersih Bapak/Ibu adalah sekitar 
             <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfitTahunan / 12)} per bulannya</strong>. 
             Apakah kira-kira angka ini sudah sesuai dengan kenyataan sehari-hari?"
           </div>
