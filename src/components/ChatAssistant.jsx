@@ -87,14 +87,36 @@ export default function ChatAssistant() {
         ...newMessages.map(msg => ({ role: msg.role, content: msg.content }))
       ];
 
-      const response = await hfRef.current.chatCompletion({
-        model: 'mistralai/Mistral-7B-Instruct-v0.3',
-        messages: chatMessages,
-        max_tokens: 512,
-        temperature: 0.7,
-      });
+      // Try multiple models in order of reliability
+      const modelsToTry = [
+        'HuggingFaceH4/zephyr-7b-beta',
+        'mistralai/Mistral-7B-Instruct-v0.2',
+        'microsoft/Phi-3-mini-4k-instruct',
+        'google/gemma-2-2b-it',
+      ];
 
-      const reply = response.choices?.[0]?.message?.content || 'Maaf, tidak ada respons.';
+      let lastError = null;
+      let reply = null;
+
+      for (const model of modelsToTry) {
+        try {
+          const response = await hfRef.current.chatCompletion({
+            model,
+            messages: chatMessages,
+            max_tokens: 512,
+            temperature: 0.7,
+          });
+          reply = response.choices?.[0]?.message?.content;
+          if (reply) break;
+        } catch (modelErr) {
+          lastError = modelErr;
+          continue; // try next model
+        }
+      }
+
+      if (!reply && lastError) throw lastError;
+      if (!reply) throw new Error('Semua model gagal merespons.');
+
       setMessages(prev => [...prev, { role: 'assistant', content: reply.trim() }]);
 
     } catch (error) {
