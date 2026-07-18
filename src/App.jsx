@@ -21,7 +21,8 @@ import { formatCurrency } from './utils';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeKbli, setActiveKbli] = useState(null);
-  const [activeTab, setActiveTab] = useState('usaha'); // 'usaha', 'aset', 'konsumsi'
+  const [activeTab, setActiveTab] = useState('usaha'); // 'usaha', 'aset', 'konsumsi', 'arsip'
+  const [activeDraft, setActiveDraft] = useState(null);
 
   // Identitas Responden (Global)
   const [namaResponden, setNamaResponden] = useState('');
@@ -119,17 +120,17 @@ function App() {
               </div>
             )}
 
-            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} namaResponden={namaResponden} />}
-            {activeKbli?.id === 'industri_tempe' && <IndustriTempeCalculator />}
-            {activeKbli?.id === 'ternak_kambing' && <TernakKambingCalculator />}
-            {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator />}
-            {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator />}
-            {activeKbli?.id === 'warung' && <WarungCalculator />}
-            {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} namaResponden={namaResponden} />}
+            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {activeKbli?.id === 'industri_tempe' && <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {activeKbli?.id === 'ternak_kambing' && <TernakKambingCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {activeKbli?.id === 'warung' && <WarungCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             
             {/* Fallback untuk KBLI lainnya */}
             {(!['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung', 'kilat'].includes(activeKbli?.id)) && (
-              <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={namaResponden} title={activeKbli?.name || "Kalkulator Usaha Umum"} />
+              <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={namaResponden} title={activeKbli?.name || "Kalkulator Usaha Umum"} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />
             )}
 
             {!activeKbli && (
@@ -177,7 +178,12 @@ function App() {
 
         {activeTab === 'arsip' && (
           <div className="fade-in">
-            <ArchiveTab />
+            <ArchiveTab onContinueDraft={(draft) => {
+              setActiveKbli({ id: draft.kbliId, name: draft.namaUsaha, code: draft.kbliCode, category: '' });
+              if (draft.namaResponden) setNamaResponden(draft.namaResponden);
+              setActiveDraft(draft);
+              setActiveTab('usaha');
+            }} />
           </div>
         )}
       </main>

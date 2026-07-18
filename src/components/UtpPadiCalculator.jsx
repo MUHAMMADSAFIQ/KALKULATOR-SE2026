@@ -3,16 +3,18 @@ import { Wheat, Wallet, Sprout, Handshake } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
+import ActionMenu from './ActionMenu';
+import BusinessConclusion from './BusinessConclusion';
 
-export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
+export default function UtpPadiCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
   // Lahan
-  const [luasUbin, setLuasUbin] = useState('');
-  const [luasMeter, setLuasMeter] = useState('');
-  const [frekuensiPanen, setFrekuensiPanen] = useState(2);
+  const [luasUbin, setLuasUbin] = useState(initialData?.rawState?.luasUbin ?? '');
+  const [luasMeter, setLuasMeter] = useState(initialData?.rawState?.luasMeter ?? '');
+  const [frekuensiPanen, setFrekuensiPanen] = useState(initialData?.rawState?.frekuensiPanen ?? 2);
   
   // Status Kepemilikan (Sawah Sendiri / Maro)
-  const [statusKepemilikan, setStatusKepemilikan] = useState('Sendiri'); // 'Sendiri', 'Maro'
-  const [persentaseMaro, setPersentaseMaro] = useState(50); // Bagian penggarap (default 50%)
+  const [statusKepemilikan, setStatusKepemilikan] = useState(initialData?.rawState?.statusKepemilikan ?? 'Sendiri'); // 'Sendiri', 'Maro'
+  const [persentaseMaro, setPersentaseMaro] = useState(initialData?.rawState?.persentaseMaro ?? 50); // Bagian penggarap (default 50%)
 
   const UBIN_TO_M2 = 14.0625;
 
@@ -37,9 +39,9 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
   };
   
   // Mode Input Biaya Modal
-  const [modeBiaya, setModeBiaya] = useState('Global'); // 'Global', 'Rinci'
-  const [modalGlobal, setModalGlobal] = useState(0);
-  const [expenses, setExpenses] = useState({
+  const [modeBiaya, setModeBiaya] = useState(initialData?.rawState?.modeBiaya ?? 'Global'); // 'Global', 'Rinci'
+  const [modalGlobal, setModalGlobal] = useState(initialData?.rawState?.modalGlobal ?? 0);
+  const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     benih: 0,
     pupuk: 0,
     pestisida: 0,
@@ -49,10 +51,10 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
   });
 
   // Mode Input Pendapatan
-  const [modePendapatan, setModePendapatan] = useState('Kuintal'); // 'Kuintal', 'Uang'
-  const [jumlahKuintal, setJumlahKuintal] = useState('');
-  const [hargaKuintal, setHargaKuintal] = useState(650000);
-  const [pendapatanUang, setPendapatanUang] = useState(0);
+  const [modePendapatan, setModePendapatan] = useState(initialData?.rawState?.modePendapatan ?? 'Kuintal'); // 'Kuintal', 'Uang'
+  const [jumlahKuintal, setJumlahKuintal] = useState(initialData?.rawState?.jumlahKuintal ?? '');
+  const [hargaKuintal, setHargaKuintal] = useState(initialData?.rawState?.hargaKuintal ?? 650000);
+  const [pendapatanUang, setPendapatanUang] = useState(initialData?.rawState?.pendapatanUang ?? 0);
   
   // Kalkulasi
   const panenGabah = modePendapatan === 'Kuintal' 
@@ -79,6 +81,40 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
 
   const updateExpense = (key, value) => setExpenses(prev => ({ ...prev, [key]: value }));
 
+  
+  const getRawState = () => ({ luasUbin, luasMeter, frekuensiPanen, statusKepemilikan, persentaseMaro, modeBiaya, modalGlobal, expenses, modePendapatan, jumlahKuintal, hargaKuintal, pendapatanUang });
+
+  const buildRecord = (status, catatan = '', namaDraft = '') => {
+    const defaultTotalIncome = typeof totalIncome !== 'undefined' ? totalIncome : (typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof panenGabah !== 'undefined' ? panenGabah * frekuensiPanen : (typeof income !== 'undefined' ? income : 0)));
+    const defaultTotalExpense = typeof totalExpense !== 'undefined' ? totalExpense : (typeof expense !== 'undefined' ? expense : 0);
+    const defaultNetTahunan = typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof labaTahun !== 'undefined' ? labaTahun : 0);
+    
+    return {
+      status, // 'draft' | 'final'
+      catatan,
+      namaDraft: status === 'draft' ? namaDraft : (typeof namaResponden !== 'undefined' ? namaResponden : ''),
+      namaResponden: typeof namaResponden !== 'undefined' ? namaResponden : '',
+      kbliCode: (typeof activeKbli !== 'undefined' && activeKbli?.code) ? activeKbli.code : '00000',
+      namaUsaha: (typeof activeKbli !== 'undefined' && activeKbli?.name) ? activeKbli.name : 'Usaha',
+      kbliId: (typeof activeKbli !== 'undefined' && activeKbli?.id) ? activeKbli.id : 'unknown',
+      total_pendapatan: defaultTotalIncome,
+      total_pengeluaran: defaultTotalExpense,
+      labaBersihBulan: Math.round(defaultNetTahunan / 12),
+      labaBersihTahun: defaultNetTahunan,
+      rawState: getRawState()
+    };
+  };
+
+  const handleSaveDraft = (namaDraft) => {
+    saveToArchive(buildRecord('draft', '', namaDraft), initialData?.id);
+    if(onSaved) onSaved();
+  };
+
+  const handleSaveFinal = (namaRecord, catatan) => {
+    saveToArchive(buildRecord('final', catatan, namaRecord), initialData?.id);
+    if(onSaved) onSaved();
+  };
+  
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
@@ -275,27 +311,13 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             Apakah kira-kira angka ini sudah sesuai dengan kenyataan sehari-hari?"
           </div>
 
-          <button 
-            className="action-btn"
-            style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
-            onClick={() => {
-              if (!namaResponden) {
-                alert("Mohon isi Nama Kepala Keluarga / Pemilik Usaha di bagian atas terlebih dahulu.");
-                return;
-              }
-              saveToArchive({
-                namaResponden: namaResponden,
-                kbliCode: activeKbli?.code || '01111',
-                namaUsaha: activeKbli?.name || 'Pertanian Padi Sawah',
-                labaBersihBulan: Math.round(netProfitTahunan / 12),
-                labaBersihTahun: netProfitTahunan,
-                luasUbin: luasUbin
-              });
-              alert("Data berhasil disimpan ke Arsip Offline!");
-            }}
-          >
-            💾 Simpan Data ke Arsip
-          </button>
+          
+      <>
+        <BusinessConclusion totalIncome={panenGabah * frekuensiPanen} totalExpense={totalExpense * frekuensiPanen} netProfitTahunan={netProfitTahunan} />
+        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+        {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
+      </>
+    
         </div>
       </div>
     </div>

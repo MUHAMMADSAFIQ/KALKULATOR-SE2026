@@ -29,16 +29,25 @@ export const getArchiveData = () => {
   }
 };
 
-export const saveToArchive = (record) => {
+export const saveToArchive = (record, id = null) => {
   const currentData = getArchiveData();
-  const newRecord = {
-    id: Date.now().toString(),
-    timestamp: new Date().toISOString(),
-    ...record
-  };
-  const updatedData = [newRecord, ...currentData];
-  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedData));
-  return updatedData;
+  
+  if (id) {
+    const updatedData = currentData.map(item => 
+      item.id === id ? { ...item, ...record, timestamp: new Date().toISOString() } : item
+    );
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedData));
+    return updatedData;
+  } else {
+    const newRecord = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      ...record
+    };
+    const updatedData = [newRecord, ...currentData];
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(updatedData));
+    return updatedData;
+  }
 };
 
 export const clearArchive = () => {

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
-import { formatCurrency } from '../utils';
+import { formatCurrency, saveToArchive } from '../utils';
+import ActionMenu from './ActionMenu';
+import BusinessConclusion from './BusinessConclusion';
 
-export default function TernakKambingCalculator() {
-  const [expenses, setExpenses] = useState({
+export default function TernakKambingCalculator({ initialData, onSaved }) {
+  const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     bibit: 0,
     pakanHijauan: 0,
     pakanKonsentrat: 0,
@@ -26,7 +28,7 @@ export default function TernakKambingCalculator() {
     biayaLainNonOps: 0,
   });
 
-  const [income, setIncome] = useState({
+  const [income, setIncome] = useState(initialData?.rawState?.income ?? {
     penjualanKambing: 0,
     penjualanKotoran: 0,
     penjualanKulit: 0,
@@ -34,8 +36,8 @@ export default function TernakKambingCalculator() {
   });
 
   // Probing State
-  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(0);
-  const [annualModalProbing, setAnnualModalProbing] = useState(0);
+  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(initialData?.rawState?.annualOmsetProbing ?? 0);
+  const [annualModalProbing, setAnnualModalProbing] = useState(initialData?.rawState?.annualModalProbing ?? 0);
 
   const totalExpense = Object.values(expenses).reduce((a, b) => a + b, 0) + annualModalProbing;
   const totalIncome = Object.values(income).reduce((a, b) => a + b, 0) + annualOmsetProbing;

@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Store, TrendingUp, TrendingDown } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
-import { formatCurrency } from '../utils';
+import { formatCurrency, saveToArchive } from '../utils';
+import ActionMenu from './ActionMenu';
+import BusinessConclusion from './BusinessConclusion';
 
-export default function WarungCalculator() {
+export default function WarungCalculator({ initialData, onSaved }) {
   // State Pengeluaran (Biaya)
-  const [expenses, setExpenses] = useState({
+  const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     upahGaji: 0,
     biayaProduksi: 0, // Plastik, kresek, dll
     pembelianBarang: 0, // Modal sembako
@@ -15,14 +17,14 @@ export default function WarungCalculator() {
   });
 
   // State Pendapatan
-  const [income, setIncome] = useState({
+  const [income, setIncome] = useState(initialData?.rawState?.income ?? {
     penjualanBarang: 0,
     pendapatanLainnya: 0, // Kardus bekas, konsinyasi
   });
 
   // Probing State
-  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(0);
-  const [annualModalProbing, setAnnualModalProbing] = useState(0);
+  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(initialData?.rawState?.annualOmsetProbing ?? 0);
+  const [annualModalProbing, setAnnualModalProbing] = useState(initialData?.rawState?.annualModalProbing ?? 0);
 
   // Kalkulasi Warung Detail
   const totalExpense = Object.values(expenses).reduce((a, b) => a + b, 0) + annualModalProbing;

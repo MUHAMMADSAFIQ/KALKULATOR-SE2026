@@ -3,10 +3,12 @@ import { Briefcase, TrendingUp, TrendingDown, Save, MessageSquare } from 'lucide
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
+import ActionMenu from './ActionMenu';
+import BusinessConclusion from './BusinessConclusion';
 
-export default function GenericBusinessCalculator({ activeKbli, namaResponden, title = "Usaha Umum / Lainnya" }) {
+export default function GenericBusinessCalculator({ activeKbli, namaResponden, title = "Usaha Umum / Lainnya" , initialData, onSaved }) {
   // Pengeluaran Umum
-  const [expenses, setExpenses] = useState({
+  const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     gaji: 0,
     bahanBaku: 0,
     operasional: 0,
@@ -16,14 +18,14 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
   });
 
   // Pemasukan Umum
-  const [income, setIncome] = useState({
+  const [income, setIncome] = useState(initialData?.rawState?.income ?? {
     omsetUtama: 0,
     pendapatanLain: 0,
   });
 
   // Probing State
-  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(0);
-  const [annualModalProbing, setAnnualModalProbing] = useState(0);
+  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(initialData?.rawState?.annualOmsetProbing ?? 0);
+  const [annualModalProbing, setAnnualModalProbing] = useState(initialData?.rawState?.annualModalProbing ?? 0);
 
   const totalExpense = Object.values(expenses).reduce((a, b) => a + b, 0) + annualModalProbing;
   const totalIncome = Object.values(income).reduce((a, b) => a + b, 0) + annualOmsetProbing;
@@ -32,6 +34,40 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
   const updateExpense = (key, value) => setExpenses(prev => ({ ...prev, [key]: value }));
   const updateIncome = (key, value) => setIncome(prev => ({ ...prev, [key]: value }));
 
+  
+  const getRawState = () => ({ expenses, income, annualOmsetProbing, annualModalProbing });
+
+  const buildRecord = (status, catatan = '', namaDraft = '') => {
+    const defaultTotalIncome = typeof totalIncome !== 'undefined' ? totalIncome : (typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof panenGabah !== 'undefined' ? panenGabah * frekuensiPanen : (typeof income !== 'undefined' ? income : 0)));
+    const defaultTotalExpense = typeof totalExpense !== 'undefined' ? totalExpense : (typeof expense !== 'undefined' ? expense : 0);
+    const defaultNetTahunan = typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof labaTahun !== 'undefined' ? labaTahun : 0);
+    
+    return {
+      status, // 'draft' | 'final'
+      catatan,
+      namaDraft: status === 'draft' ? namaDraft : (typeof namaResponden !== 'undefined' ? namaResponden : ''),
+      namaResponden: typeof namaResponden !== 'undefined' ? namaResponden : '',
+      kbliCode: (typeof activeKbli !== 'undefined' && activeKbli?.code) ? activeKbli.code : '00000',
+      namaUsaha: (typeof activeKbli !== 'undefined' && activeKbli?.name) ? activeKbli.name : 'Usaha',
+      kbliId: (typeof activeKbli !== 'undefined' && activeKbli?.id) ? activeKbli.id : 'unknown',
+      total_pendapatan: defaultTotalIncome,
+      total_pengeluaran: defaultTotalExpense,
+      labaBersihBulan: Math.round(defaultNetTahunan / 12),
+      labaBersihTahun: defaultNetTahunan,
+      rawState: getRawState()
+    };
+  };
+
+  const handleSaveDraft = (namaDraft) => {
+    saveToArchive(buildRecord('draft', '', namaDraft), initialData?.id);
+    if(onSaved) onSaved();
+  };
+
+  const handleSaveFinal = (namaRecord, catatan) => {
+    saveToArchive(buildRecord('final', catatan, namaRecord), initialData?.id);
+    if(onSaved) onSaved();
+  };
+  
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
       <div className="card-header" style={{ borderBottomColor: '#10b981' }}>
@@ -96,26 +132,13 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
             Apakah menurut Bapak/Ibu angka ini wajar dengan kondisi sehari-hari?"
           </div>
 
-          <button 
-            className="action-btn"
-            style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
-            onClick={() => {
-              if (!namaResponden) {
-                alert("Mohon isi Nama Kepala Keluarga / Pemilik Usaha di bagian atas terlebih dahulu.");
-                return;
-              }
-              saveToArchive({
-                namaResponden: namaResponden,
-                kbliCode: activeKbli?.code || '00000',
-                namaUsaha: activeKbli?.name || title,
-                labaBersihBulan: Math.round(netProfit / 12),
-                labaBersihTahun: netProfit
-              });
-              alert("Data berhasil disimpan ke Arsip Offline!");
-            }}
-          >
-            <Save size={16} /> Simpan Data ke Arsip
-          </button>
+          
+      <>
+        
+        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+        {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
+      </>
+    
         </div>
       </div>
     </div>

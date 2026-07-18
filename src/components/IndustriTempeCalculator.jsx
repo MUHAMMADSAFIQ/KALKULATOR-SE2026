@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
-import { formatCurrency } from '../utils';
+import { formatCurrency, saveToArchive } from '../utils';
+import ActionMenu from './ActionMenu';
+import BusinessConclusion from './BusinessConclusion';
 
-export default function IndustriTempeCalculator() {
-  const [expenses, setExpenses] = useState({
+export default function IndustriTempeCalculator({ initialData, onSaved }) {
+  const [expenses, setExpenses] = useState(initialData?.rawState?.expenses ?? {
     upahGaji: 0,
     kedelai: 0,
     ragi: 0,
@@ -21,15 +23,15 @@ export default function IndustriTempeCalculator() {
     administrasiBank: 0,
   });
 
-  const [income, setIncome] = useState({
+  const [income, setIncome] = useState(initialData?.rawState?.income ?? {
     penjualanTempe: 0,
     penjualanAmpas: 0,
     jasaPenggilingan: 0,
   });
 
   // Probing State
-  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(0);
-  const [annualModalProbing, setAnnualModalProbing] = useState(0);
+  const [annualOmsetProbing, setAnnualOmsetProbing] = useState(initialData?.rawState?.annualOmsetProbing ?? 0);
+  const [annualModalProbing, setAnnualModalProbing] = useState(initialData?.rawState?.annualModalProbing ?? 0);
 
   const totalExpense = Object.values(expenses).reduce((a, b) => a + b, 0) + annualModalProbing;
   const totalIncome = Object.values(income).reduce((a, b) => a + b, 0) + annualOmsetProbing;

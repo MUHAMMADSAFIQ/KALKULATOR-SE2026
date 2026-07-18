@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Zap, Save, MessageSquare } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import { formatCurrency, saveToArchive } from '../utils';
+import ActionMenu from './ActionMenu';
+import BusinessConclusion from './BusinessConclusion';
 
-export default function QuickCalculator({ activeKbli, namaResponden }) {
-  const [periode, setPeriode] = useState('Bulan'); // 'Hari', 'Minggu', 'Bulan'
-  const [pemasukan, setPemasukan] = useState(0);
-  const [pengeluaran, setPengeluaran] = useState(0);
+export default function QuickCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
+  const [periode, setPeriode] = useState(initialData?.rawState?.periode ?? 'Bulan'); // 'Hari', 'Minggu', 'Bulan'
+  const [pemasukan, setPemasukan] = useState(initialData?.rawState?.pemasukan ?? 0);
+  const [pengeluaran, setPengeluaran] = useState(initialData?.rawState?.pengeluaran ?? 0);
 
   // Hitung Laba Bersih
   const labaBersihPeriode = (pemasukan || 0) - (pengeluaran || 0);
@@ -19,6 +21,40 @@ export default function QuickCalculator({ activeKbli, namaResponden }) {
   
   const labaTahun = labaBulan * 12;
 
+  
+  const getRawState = () => ({ periode, pemasukan, pengeluaran });
+
+  const buildRecord = (status, catatan = '', namaDraft = '') => {
+    const defaultTotalIncome = typeof totalIncome !== 'undefined' ? totalIncome : (typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof panenGabah !== 'undefined' ? panenGabah * frekuensiPanen : (typeof income !== 'undefined' ? income : 0)));
+    const defaultTotalExpense = typeof totalExpense !== 'undefined' ? totalExpense : (typeof expense !== 'undefined' ? expense : 0);
+    const defaultNetTahunan = typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof labaTahun !== 'undefined' ? labaTahun : 0);
+    
+    return {
+      status, // 'draft' | 'final'
+      catatan,
+      namaDraft: status === 'draft' ? namaDraft : (typeof namaResponden !== 'undefined' ? namaResponden : ''),
+      namaResponden: typeof namaResponden !== 'undefined' ? namaResponden : '',
+      kbliCode: (typeof activeKbli !== 'undefined' && activeKbli?.code) ? activeKbli.code : '00000',
+      namaUsaha: (typeof activeKbli !== 'undefined' && activeKbli?.name) ? activeKbli.name : 'Usaha',
+      kbliId: (typeof activeKbli !== 'undefined' && activeKbli?.id) ? activeKbli.id : 'unknown',
+      total_pendapatan: defaultTotalIncome,
+      total_pengeluaran: defaultTotalExpense,
+      labaBersihBulan: Math.round(defaultNetTahunan / 12),
+      labaBersihTahun: defaultNetTahunan,
+      rawState: getRawState()
+    };
+  };
+
+  const handleSaveDraft = (namaDraft) => {
+    saveToArchive(buildRecord('draft', '', namaDraft), initialData?.id);
+    if(onSaved) onSaved();
+  };
+
+  const handleSaveFinal = (namaRecord, catatan) => {
+    saveToArchive(buildRecord('final', catatan, namaRecord), initialData?.id);
+    if(onSaved) onSaved();
+  };
+  
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
@@ -79,26 +115,13 @@ export default function QuickCalculator({ activeKbli, namaResponden }) {
             <strong style={{ color: labaBulan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(labaBulan)} per bulan</strong> ya?"
           </div>
 
-          <button 
-            className="action-btn"
-            style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
-            onClick={() => {
-              if (!namaResponden) {
-                alert("Mohon isi Nama Kepala Keluarga / Pemilik Usaha di bagian atas terlebih dahulu.");
-                return;
-              }
-              saveToArchive({
-                namaResponden: namaResponden,
-                kbliCode: activeKbli?.code || '00000',
-                namaUsaha: activeKbli?.name || 'Usaha (Sederhana)',
-                labaBersihBulan: Math.round(labaBulan),
-                labaBersihTahun: Math.round(labaTahun)
-              });
-              alert("Data berhasil disimpan ke Arsip Offline!");
-            }}
-          >
-            <Save size={16} /> Simpan Data ke Arsip
-          </button>
+          
+      <>
+        <BusinessConclusion totalIncome={income} totalExpense={expense} netProfitTahunan={labaTahun} />
+        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+        {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
+      </>
+    
         </div>
       </div>
     </div>
