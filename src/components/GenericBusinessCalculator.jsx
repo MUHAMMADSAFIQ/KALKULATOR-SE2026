@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
-import { formatCurrency } from '../utils';
+import { formatCurrency, saveToArchive } from '../utils';
 
-export default function GenericBusinessCalculator({ title = "Usaha Umum / Lainnya" }) {
+export default function GenericBusinessCalculator({ activeKbli, title = "Usaha Umum / Lainnya" }) {
   // Pengeluaran Umum
   const [expenses, setExpenses] = useState({
     gaji: 0,
@@ -86,6 +86,31 @@ export default function GenericBusinessCalculator({ title = "Usaha Umum / Lainny
           <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
             <span style={{ color: 'var(--accent-secondary)', fontWeight: 'bold' }}>Rata-rata Bersih Per Bulan: {formatCurrency(netProfit / 12)}</span>
           </div>
+
+          {/* Kesimpulan Manusiawi */}
+          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: 'var(--radius-sm)', borderLeft: '4px solid var(--accent-primary)', textAlign: 'left', fontStyle: 'italic', color: 'var(--text-primary)' }}>
+            <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
+            "Berdasarkan pendapatan bulanan dan tahunan dikurangi biaya operasional, perkiraan penghasilan bersih dari usaha <strong>{title}</strong> ini adalah sekitar 
+            <strong style={{ color: netProfit >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfit / 12)} per bulannya</strong>. 
+            Apakah menurut Bapak/Ibu angka ini wajar dengan kondisi sehari-hari?"
+          </div>
+
+          <button 
+            className="action-btn"
+            style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
+            onClick={() => {
+              saveToArchive({
+                namaResponden: prompt("Masukkan Nama Responden / Pemilik Usaha:"),
+                kbliCode: activeKbli?.code || '00000',
+                namaUsaha: activeKbli?.name || title,
+                labaBersihBulan: Math.round(netProfit / 12),
+                labaBersihTahun: netProfit
+              });
+              alert("Data berhasil disimpan ke Arsip Offline!");
+            }}
+          >
+            💾 Simpan Data ke Arsip
+          </button>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ import AssetCalculator from './components/AssetCalculator';
 import WeeklyExpenses from './components/WeeklyExpenses';
 import MonthlyExpenses from './components/MonthlyExpenses';
 import YearlyExpenses from './components/YearlyExpenses';
+import ArchiveTab from './components/ArchiveTab';
 import ChatAssistant from './components/ChatAssistant';
 import { formatCurrency } from './utils';
 
@@ -84,15 +85,16 @@ function App() {
               </div>
             )}
 
-            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator />}
+            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} />}
             {activeKbli?.id === 'industri_tempe' && <IndustriTempeCalculator />}
             {activeKbli?.id === 'ternak_kambing' && <TernakKambingCalculator />}
             {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator />}
             {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator />}
             {activeKbli?.id === 'warung' && <WarungCalculator />}
             
-            {activeKbli?.id && !['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung'].includes(activeKbli.id) && (
-              <GenericBusinessCalculator title={activeKbli.name} />
+            {/* Fallback untuk KBLI lainnya */}
+            {(!['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung'].includes(activeKbli?.id)) && (
+              <GenericBusinessCalculator activeKbli={activeKbli} title={activeKbli?.name || "Kalkulator Usaha Umum"} />
             )}
 
             {!activeKbli && (
@@ -137,6 +139,12 @@ function App() {
             </div>
           </div>
         )}
+
+        {activeTab === 'arsip' && (
+          <div className="fade-in">
+            <ArchiveTab />
+          </div>
+        )}
       </main>
 
       {/* Floating Chat Assistant */}
@@ -164,6 +172,13 @@ function App() {
         >
           <span className="nav-icon">🛒</span>
           <span className="nav-label">Konsumsi</span>
+        </button>
+        <button 
+          className={`nav-item ${activeTab === 'arsip' ? 'active' : ''}`}
+          onClick={() => setActiveTab('arsip')}
+        >
+          <span className="nav-icon">📁</span>
+          <span className="nav-label">Arsip</span>
         </button>
       </nav>
     </div>

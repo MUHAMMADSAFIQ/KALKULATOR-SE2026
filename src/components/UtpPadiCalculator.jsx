@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
-import { formatCurrency } from '../utils';
+import { formatCurrency, saveToArchive } from '../utils';
 
-export default function UtpPadiCalculator() {
+export default function UtpPadiCalculator({ activeKbli }) {
   const [luasUbin, setLuasUbin] = useState('');
   const [luasMeter, setLuasMeter] = useState('');
   const [frekuensiPanen, setFrekuensiPanen] = useState(2);
@@ -197,6 +197,24 @@ export default function UtpPadiCalculator() {
             <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfitTahunan / 12)} per bulannya</strong>. 
             Apakah kira-kira angka ini sudah sesuai dengan kenyataan sehari-hari?"
           </div>
+
+          <button 
+            className="action-btn"
+            style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
+            onClick={() => {
+              saveToArchive({
+                namaResponden: prompt("Masukkan Nama Petani/Responden:"),
+                kbliCode: activeKbli?.code || '01111',
+                namaUsaha: activeKbli?.name || 'Pertanian Padi Sawah',
+                labaBersihBulan: Math.round(netProfitTahunan / 12),
+                labaBersihTahun: netProfitTahunan,
+                luasUbin: luasUbin
+              });
+              alert("Data berhasil disimpan ke Arsip Offline!");
+            }}
+          >
+            💾 Simpan Data ke Arsip
+          </button>
         </div>
       </div>
     </div>
