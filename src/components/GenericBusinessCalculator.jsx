@@ -45,8 +45,8 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
     return {
       status, // 'draft' | 'final'
       catatan,
-      namaDraft: status === 'draft' ? namaDraft : (typeof namaResponden !== 'undefined' ? namaResponden : ''),
-      namaResponden: typeof namaResponden !== 'undefined' ? namaResponden : '',
+      namaDraft: namaDraft || (typeof namaResponden !== 'undefined' ? namaResponden : ''),
+      namaResponden: namaDraft || (typeof namaResponden !== 'undefined' ? namaResponden : ''),
       kbliCode: (typeof activeKbli !== 'undefined' && activeKbli?.code) ? activeKbli.code : '00000',
       namaUsaha: (typeof activeKbli !== 'undefined' && activeKbli?.name) ? activeKbli.name : 'Usaha',
       kbliId: (typeof activeKbli !== 'undefined' && activeKbli?.id) ? activeKbli.id : 'unknown',
