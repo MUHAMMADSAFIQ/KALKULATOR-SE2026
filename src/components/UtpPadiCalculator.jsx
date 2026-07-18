@@ -254,7 +254,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
             "Berdasarkan data yang Bapak/Ibu berikan, lahan seluas 
             <strong style={{ color: '#84cc16' }}> {luasUbin ? `${luasUbin} ubin` : '...'} </strong> 
-            ini {statusKepemilikan === 'Maro' ? <strong>digarap secara bagi hasil ({persentaseMaro}%)</strong> dan : ''} bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. 
+            ini {statusKepemilikan === 'Maro' ? <span><strong>digarap secara bagi hasil ({persentaseMaro}%)</strong> dan </span> : ''} bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. 
             Setelah dipotong semua biaya modal (traktor, buruh, pupuk, dll), perkiraan penghasilan bersih Bapak/Ibu adalah sekitar 
             <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfitTahunan / 12)} per bulannya</strong>. 
             Apakah kira-kira angka ini sudah sesuai dengan kenyataan sehari-hari?"
