@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Lightbulb } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import { formatCurrency } from '../utils';
 
@@ -30,7 +31,7 @@ export default function MonthlyExpenses({ onTotalChange }) {
   return (
     <div className="glass-card">
       <div className="card-header">
-        <h2 className="card-title">💡 Pengeluaran Bulanan</h2>
+        <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Lightbulb size={20} color="var(--accent-primary)" /> Pengeluaran Bulanan</h2>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
         <button 

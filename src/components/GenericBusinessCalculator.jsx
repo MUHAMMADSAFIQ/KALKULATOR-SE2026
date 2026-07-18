@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Briefcase, TrendingUp, TrendingDown, Save, MessageSquare } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
@@ -34,13 +35,13 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
       <div className="card-header" style={{ borderBottomColor: '#10b981' }}>
-        <h2 className="card-title" style={{ color: '#10b981' }}>💼 Kalkulator Usaha: {title}</h2>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Briefcase size={20} /> Kalkulator Usaha: {title}</h2>
       </div>
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pemasukan */}
         <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: 'var(--success)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 Total Pendapatan</h3>
+          <h3 style={{ color: 'var(--success)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Total Pendapatan</h3>
           <CurrencyInput label="Omset / Penjualan Utama" value={income.omsetUtama} onChange={(v) => updateIncome('omsetUtama', v)} />
           <CurrencyInput label="Pendapatan Sampingan / Lainnya" value={income.pendapatanLain} onChange={(v) => updateIncome('pendapatanLain', v)} />
           
@@ -54,7 +55,7 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
 
         {/* Kolom Pengeluaran */}
         <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 Total Biaya Operasional</h3>
+          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingDown size={18} /> Total Biaya Operasional</h3>
           <CurrencyInput label="Gaji / Upah Karyawan" value={expenses.gaji} onChange={(v) => updateExpense('gaji', v)} />
           <CurrencyInput label="Bahan Baku / Modal Dagang" value={expenses.bahanBaku} onChange={(v) => updateExpense('bahanBaku', v)} />
           <CurrencyInput label="Biaya Operasional (Listrik, Air, Transport)" value={expenses.operasional} onChange={(v) => updateExpense('operasional', v)} />
@@ -89,7 +90,7 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
 
           {/* Kesimpulan Manusiawi */}
           <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: 'var(--radius-sm)', borderLeft: '4px solid var(--accent-primary)', textAlign: 'left', fontStyle: 'italic', color: 'var(--text-primary)' }}>
-            <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
+            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}><MessageSquare size={16} /> Kesimpulan (Narasi Wawancara):</strong>
             "Berdasarkan pendapatan bulanan dan tahunan dikurangi biaya operasional, perkiraan penghasilan bersih dari usaha <strong>{title}</strong> ini adalah sekitar 
             <strong style={{ color: netProfit >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfit / 12)} per bulannya</strong>. 
             Apakah menurut Bapak/Ibu angka ini wajar dengan kondisi sehari-hari?"
@@ -113,7 +114,7 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
               alert("Data berhasil disimpan ke Arsip Offline!");
             }}
           >
-            💾 Simpan Data ke Arsip
+            <Save size={16} /> Simpan Data ke Arsip
           </button>
         </div>
       </div>

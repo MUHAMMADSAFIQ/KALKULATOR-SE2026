@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Wheat, Wallet, Sprout, Handshake } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
@@ -126,7 +127,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
                 transition: 'all 0.2s'
               }}
             >
-              {mode === 'Sendiri' ? '🌱 Sawah Sendiri' : '🤝 Bagi Hasil (Maro)'}
+              {mode === 'Sendiri' ? <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}><Sprout size={16}/> Sawah Sendiri</span> : <span style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}}><Handshake size={16}/> Bagi Hasil (Maro)</span>}
             </button>
           ))}
         </div>
@@ -152,7 +153,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
         {/* KOLOM PENDAPATAN */}
         <div className="calculation-section">
           <div className="section-header">
-            <span className="section-icon">🌾</span>
+            <span className="section-icon"><Wheat size={24} color="var(--accent-primary)" /></span>
             <h3 className="section-title">Pendapatan (Per Panen)</h3>
           </div>
           
@@ -210,7 +211,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
         {/* KOLOM PENGELUARAN */}
         <div className="calculation-section">
           <div className="section-header">
-            <span className="section-icon">💸</span>
+            <span className="section-icon"><Wallet size={24} color="var(--danger)" /></span>
             <h3 className="section-title">Modal / Pengeluaran (Per Panen)</h3>
           </div>
 

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Search, Zap } from 'lucide-react';
 
 export default function SearchKbli({ onSelectUsaha }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -63,7 +64,7 @@ export default function SearchKbli({ onSelectUsaha }) {
 
     // --- SAPU JAGAT ---
     { id: 'umum', category: 'U', name: 'Usaha Lainnya (Kalkulator Rinci)', code: '00000' },
-    { id: 'kilat', category: 'U', name: '⚡ Kalkulator Kilat (Hanya Input Pemasukan & Pengeluaran Global)', code: '00001' },
+    { id: 'kilat', category: 'U', name: 'Kalkulator Kilat (Hanya Input Pemasukan & Pengeluaran Global)', code: '00001', isQuick: true },
   ];
 
   const filteredData = kbliData.filter(item => 
@@ -74,7 +75,7 @@ export default function SearchKbli({ onSelectUsaha }) {
 
   return (
     <div className="glass-card" style={{ marginBottom: 'var(--spacing-lg)' }}>
-      <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem' }}>🔍 Cari Usaha Berdasarkan KBLI 2025</h3>
+      <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Search size={20} /> Cari Usaha Berdasarkan KBLI 2025</h3>
       <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
         Database disesuaikan dengan KBLI 2025 (Perban BPS No. 7 Tahun 2025) untuk keperluan Sensus Ekonomi 2026.
       </p>
@@ -116,7 +117,9 @@ export default function SearchKbli({ onSelectUsaha }) {
                   <span style={{ fontSize: '0.75rem', color: 'var(--accent-secondary)', fontWeight: 'bold' }}>
                     KATEGORI {item.category}
                   </span>
-                  <span style={{ fontWeight: '500', fontSize: '1rem' }}>{item.name}</span>
+                  <span style={{ fontWeight: '600' }}>
+                    {item.isQuick ? <span style={{display: 'inline-flex', alignItems: 'center', gap: '0.2rem'}}><Zap size={14} color="#f59e0b" /> {item.name}</span> : item.name}
+                  </span>
                 </div>
                 <span style={{ background: 'var(--accent-primary)', color: 'white', padding: '0.3rem 0.6rem', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold', marginLeft: '1rem' }}>
                   {item.code}

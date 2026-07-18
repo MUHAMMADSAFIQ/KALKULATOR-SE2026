@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Utensils } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import { formatCurrency } from '../utils';
 
@@ -16,7 +17,7 @@ export default function WeeklyExpenses({ onTotalChange }) {
   return (
     <div className="glass-card">
       <div className="card-header">
-        <h2 className="card-title">🍲 Pengeluaran Mingguan</h2>
+        <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Utensils size={20} color="var(--accent-primary)" /> Pengeluaran Mingguan</h2>
       </div>
       
       <CurrencyInput 

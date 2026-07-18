@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Zap, Save, MessageSquare } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import { formatCurrency, saveToArchive } from '../utils';
 
@@ -21,7 +22,7 @@ export default function QuickCalculator({ activeKbli, namaResponden }) {
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
-        <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}>⚡ Kalkulator Kilat (Sederhana)</h2>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Zap size={20} /> Kalkulator Kilat (Sederhana)</h2>
       </div>
       
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>
@@ -73,7 +74,7 @@ export default function QuickCalculator({ activeKbli, namaResponden }) {
           </span>
           
           <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: 'var(--radius-sm)', borderLeft: '4px solid var(--accent-primary)', textAlign: 'left', fontStyle: 'italic', color: 'var(--text-primary)' }}>
-            <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan Wawancara:</strong>
+            <strong style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}><MessageSquare size={16} /> Kesimpulan Wawancara:</strong>
             "Jadi, rata-rata pendapatan bersih Bapak/Ibu dari usaha ini sekitar 
             <strong style={{ color: labaBulan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(labaBulan)} per bulan</strong> ya?"
           </div>
@@ -96,7 +97,7 @@ export default function QuickCalculator({ activeKbli, namaResponden }) {
               alert("Data berhasil disimpan ke Arsip Offline!");
             }}
           >
-            💾 Simpan Data ke Arsip
+            <Save size={16} /> Simpan Data ke Arsip
           </button>
         </div>
       </div>

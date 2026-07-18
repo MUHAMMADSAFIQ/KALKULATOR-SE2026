@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FolderArchive, Download, Trash2, DatabaseBackup } from 'lucide-react';
 import { getArchiveData, exportToCSV, clearArchive, formatCurrency } from '../utils';
 
 export default function ArchiveTab() {
@@ -23,7 +24,7 @@ export default function ArchiveTab() {
   return (
     <div className="tab-pane active slide-up">
       <div className="glass-card" style={{ marginBottom: '1.5rem', background: 'rgba(99, 102, 241, 0.1)' }}>
-        <h2 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>📁 Arsip Kuesioner (Offline)</h2>
+        <h2 style={{ color: 'var(--accent-primary)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FolderArchive size={20} /> Arsip Kuesioner (Offline)</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
           Semua data yang Anda simpan akan masuk ke sini dan tersimpan aman di memori HP Anda tanpa butuh internet.
         </p>
@@ -35,7 +36,7 @@ export default function ArchiveTab() {
             onClick={handleExport}
             disabled={records.length === 0}
           >
-            📥 Unduh Excel (CSV)
+            <Download size={16} /> Unduh Excel (CSV)
           </button>
           <button 
             className="action-btn"
@@ -43,7 +44,7 @@ export default function ArchiveTab() {
             onClick={handleClear}
             disabled={records.length === 0}
           >
-            🗑️ Kosongkan
+            <Trash2 size={16} /> Kosongkan
           </button>
         </div>
       </div>
@@ -51,7 +52,7 @@ export default function ArchiveTab() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {records.length === 0 ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-            <span style={{ fontSize: '3rem' }}>📭</span>
+            <span style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}><DatabaseBackup size={48} strokeWidth={1} /></span>
             <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>Belum ada data yang tersimpan hari ini.</p>
           </div>
         ) : (

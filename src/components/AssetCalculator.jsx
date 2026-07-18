@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
+import { Gem, Save, MessageSquare } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
-import { formatCurrency } from '../utils';
+import { formatCurrency, saveToArchive } from '../utils';
 
 export default function AssetCalculator() {
   // Aset Tanah & Bangunan
@@ -29,7 +30,7 @@ export default function AssetCalculator() {
   return (
     <div className="glass-card property-card" style={{ marginTop: 'var(--spacing-xl)' }}>
       <div className="card-header">
-        <h2 className="card-title">💎 Total Aset Usaha & Pribadi</h2>
+        <h2 className="card-title" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Gem size={20} color="var(--accent-primary)" /> Total Aset Usaha & Pribadi</h2>
       </div>
       
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
