@@ -80,17 +80,35 @@ export default function ChatAssistant() {
         ...newMessages.map(msg => ({ role: msg.role, content: msg.content }))
       ];
 
-      const response = await hfRef.current.chatCompletion({
-        model: 'HuggingFaceH4/zephyr-7b-beta',
-        messages: chatMessages,
-        max_tokens: 400,
-        temperature: 0.7,
-        provider: 'hf-inference',
-      });
+      // Try multiple models - some may be unavailable on free tier
+      const modelsToTry = [
+        'Qwen/Qwen2.5-72B-Instruct',
+        'mistralai/Mixtral-8x7B-Instruct-v0.1',
+        'meta-llama/Meta-Llama-3-8B-Instruct',
+        'google/gemma-2-2b-it',
+      ];
 
-      let reply = response.choices?.[0]?.message?.content || '';
-      reply = reply.trim();
-      if (!reply) reply = 'Maaf, saya tidak bisa menjawab saat ini. Coba lagi.';
+      let reply = null;
+      let lastError = null;
+
+      for (const model of modelsToTry) {
+        try {
+          const response = await hfRef.current.chatCompletion({
+            model,
+            messages: chatMessages,
+            max_tokens: 400,
+            temperature: 0.7,
+          });
+          reply = response.choices?.[0]?.message?.content?.trim();
+          if (reply) break;
+        } catch (err) {
+          lastError = err;
+          continue;
+        }
+      }
+
+      if (!reply && lastError) throw lastError;
+      if (!reply) throw new Error('Semua model gagal merespons.');
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
 
     } catch (error) {
