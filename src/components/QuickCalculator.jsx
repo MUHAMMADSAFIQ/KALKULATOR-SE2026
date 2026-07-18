@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import CurrencyInput from './CurrencyInput';
 import { formatCurrency, saveToArchive } from '../utils';
 
-export default function QuickCalculator({ activeKbli }) {
+export default function QuickCalculator({ activeKbli, namaResponden }) {
   const [periode, setPeriode] = useState('Bulan'); // 'Hari', 'Minggu', 'Bulan'
   const [pemasukan, setPemasukan] = useState(0);
   const [pengeluaran, setPengeluaran] = useState(0);
@@ -82,8 +82,12 @@ export default function QuickCalculator({ activeKbli }) {
             className="action-btn"
             style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
             onClick={() => {
+              if (!namaResponden) {
+                alert("Mohon isi Nama Kepala Keluarga / Pemilik Usaha di bagian atas terlebih dahulu.");
+                return;
+              }
               saveToArchive({
-                namaResponden: prompt("Masukkan Nama Responden:"),
+                namaResponden: namaResponden,
                 kbliCode: activeKbli?.code || '00000',
                 namaUsaha: activeKbli?.name || 'Usaha (Sederhana)',
                 labaBersihBulan: Math.round(labaBulan),

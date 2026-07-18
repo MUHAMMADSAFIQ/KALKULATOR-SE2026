@@ -22,6 +22,9 @@ function App() {
   const [activeKbli, setActiveKbli] = useState(null);
   const [activeTab, setActiveTab] = useState('usaha'); // 'usaha', 'aset', 'konsumsi'
 
+  // Identitas Responden (Global)
+  const [namaResponden, setNamaResponden] = useState('');
+
   // Pengeluaran Rumah Tangga (Global)
   const [totalWeekly, setTotalWeekly] = useState(0);
   const [totalMonthly, setTotalMonthly] = useState(0);
@@ -66,6 +69,18 @@ function App() {
         {/* TAB 1: USAHA */}
         {activeTab === 'usaha' && (
           <div className="tab-content" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>👤 Nama Kepala Keluarga / Pemilik Usaha</label>
+              <input 
+                type="text" 
+                className="input-field" 
+                placeholder="Ketik nama responden di sini..." 
+                value={namaResponden}
+                onChange={(e) => setNamaResponden(e.target.value)}
+                style={{ fontSize: '1.1rem', background: 'rgba(255, 255, 255, 0.05)' }}
+              />
+            </div>
+
             <SearchKbli onSelectUsaha={setActiveKbli} />
             
             {activeKbli && (
@@ -86,17 +101,17 @@ function App() {
               </div>
             )}
 
-            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} />}
+            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} namaResponden={namaResponden} />}
             {activeKbli?.id === 'industri_tempe' && <IndustriTempeCalculator />}
             {activeKbli?.id === 'ternak_kambing' && <TernakKambingCalculator />}
             {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator />}
             {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator />}
             {activeKbli?.id === 'warung' && <WarungCalculator />}
-            {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} />}
+            {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} namaResponden={namaResponden} />}
             
             {/* Fallback untuk KBLI lainnya */}
             {(!['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung', 'kilat'].includes(activeKbli?.id)) && (
-              <GenericBusinessCalculator activeKbli={activeKbli} title={activeKbli?.name || "Kalkulator Usaha Umum"} />
+              <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={namaResponden} title={activeKbli?.name || "Kalkulator Usaha Umum"} />
             )}
 
             {!activeKbli && (

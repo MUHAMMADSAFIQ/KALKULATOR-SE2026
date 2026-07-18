@@ -3,7 +3,7 @@ import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 
-export default function UtpPadiCalculator({ activeKbli }) {
+export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
   const [luasUbin, setLuasUbin] = useState('');
   const [luasMeter, setLuasMeter] = useState('');
   const [frekuensiPanen, setFrekuensiPanen] = useState(2);
@@ -202,8 +202,12 @@ export default function UtpPadiCalculator({ activeKbli }) {
             className="action-btn"
             style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
             onClick={() => {
+              if (!namaResponden) {
+                alert("Mohon isi Nama Kepala Keluarga / Pemilik Usaha di bagian atas terlebih dahulu.");
+                return;
+              }
               saveToArchive({
-                namaResponden: prompt("Masukkan Nama Petani/Responden:"),
+                namaResponden: namaResponden,
                 kbliCode: activeKbli?.code || '01111',
                 namaUsaha: activeKbli?.name || 'Pertanian Padi Sawah',
                 labaBersihBulan: Math.round(netProfitTahunan / 12),

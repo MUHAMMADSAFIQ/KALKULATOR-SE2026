@@ -3,7 +3,7 @@ import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency, saveToArchive } from '../utils';
 
-export default function GenericBusinessCalculator({ activeKbli, title = "Usaha Umum / Lainnya" }) {
+export default function GenericBusinessCalculator({ activeKbli, namaResponden, title = "Usaha Umum / Lainnya" }) {
   // Pengeluaran Umum
   const [expenses, setExpenses] = useState({
     gaji: 0,
@@ -99,8 +99,12 @@ export default function GenericBusinessCalculator({ activeKbli, title = "Usaha U
             className="action-btn"
             style={{ width: '100%', marginTop: '2rem', background: 'var(--success)', padding: '1rem', fontSize: '1.1rem' }}
             onClick={() => {
+              if (!namaResponden) {
+                alert("Mohon isi Nama Kepala Keluarga / Pemilik Usaha di bagian atas terlebih dahulu.");
+                return;
+              }
               saveToArchive({
-                namaResponden: prompt("Masukkan Nama Responden / Pemilik Usaha:"),
+                namaResponden: namaResponden,
                 kbliCode: activeKbli?.code || '00000',
                 namaUsaha: activeKbli?.name || title,
                 labaBersihBulan: Math.round(netProfit / 12),
