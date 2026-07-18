@@ -1,62 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { HfInference } from '@huggingface/inference';
 
-const MODELS = [
-  { id: 'mistralai/Mistral-7B-Instruct-v0.3', name: 'Mistral 7B (Gratis)', template: 'mistral' },
-  { id: 'HuggingFaceH4/zephyr-7b-beta', name: 'Zephyr 7B (Gratis)', template: 'zephyr' },
-  { id: 'microsoft/Phi-3-mini-4k-instruct', name: 'Phi-3 Mini (Gratis)', template: 'phi3' },
-];
-
-const SYSTEM_PROMPT = `Anda adalah asisten pintar untuk petugas Sensus Ekonomi BPS 2026 di Indonesia. Tugas Anda: membantu klasifikasi kode KBLI, mengevaluasi kewajaran data keuangan usaha, menjelaskan konsep survei ekonomi BPS, dan membantu perhitungan probing data usaha. Jawab ringkas, ramah, profesional dalam Bahasa Indonesia.`;
-
-function buildPrompt(template, messages) {
-  const history = messages.filter(m => m.role !== 'system');
-  
-  if (template === 'mistral') {
-    let prompt = '';
-    for (let i = 0; i < history.length; i++) {
-      if (history[i].role === 'user') {
-        const instruction = i === 0 
-          ? `${SYSTEM_PROMPT}\n\nPertanyaan: ${history[i].content}` 
-          : history[i].content;
-        prompt += `<s>[INST] ${instruction} [/INST]`;
-      } else {
-        prompt += ` ${history[i].content}</s>`;
-      }
-    }
-    return prompt;
-  }
-  
-  if (template === 'zephyr') {
-    let prompt = `<|system|>\n${SYSTEM_PROMPT}</s>\n`;
-    for (const msg of history) {
-      if (msg.role === 'user') {
-        prompt += `<|user|>\n${msg.content}</s>\n`;
-      } else {
-        prompt += `<|assistant|>\n${msg.content}</s>\n`;
-      }
-    }
-    prompt += `<|assistant|>\n`;
-    return prompt;
-  }
-  
-  // phi3
-  let prompt = `<|system|>\n${SYSTEM_PROMPT}<|end|>\n`;
-  for (const msg of history) {
-    if (msg.role === 'user') {
-      prompt += `<|user|>\n${msg.content}<|end|>\n`;
-    } else {
-      prompt += `<|assistant|>\n${msg.content}<|end|>\n`;
-    }
-  }
-  prompt += `<|assistant|>\n`;
-  return prompt;
-}
+const SYSTEM_PROMPT = `Anda adalah asisten pintar untuk petugas Sensus Ekonomi BPS 2026 di Indonesia. 
+Tugas Anda:
+- Membantu klasifikasi kode KBLI (Klasifikasi Baku Lapangan Usaha Indonesia)
+- Mengevaluasi kewajaran data keuangan usaha (omset, laba, biaya operasional)
+- Menjelaskan konsep-konsep survei ekonomi BPS
+- Membantu perhitungan dan probing data usaha
+Jawab dengan ringkas, ramah, dan profesional dalam Bahasa Indonesia.`;
 
 export default function ChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  const [selectedModelIdx, setSelectedModelIdx] = useState(0);
   
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Halo! Saya Asisten AI Sensus BPS. Ada yang bisa saya bantu terkait KBLI, kelogisan data, atau konsep survei?' }
@@ -65,12 +21,14 @@ export default function ChatAssistant() {
   const [isLoading, setIsLoading] = useState(false);
   
   const messagesEndRef = useRef(null);
+  const hfRef = useRef(null);
 
   useEffect(() => {
     const savedKey = localStorage.getItem('hf_api_key');
-    const savedIdx = localStorage.getItem('hf_model_idx');
-    if (savedKey) setApiKey(savedKey);
-    if (savedIdx) setSelectedModelIdx(parseInt(savedIdx) || 0);
+    if (savedKey) {
+      setApiKey(savedKey);
+      hfRef.current = new HfInference(savedKey);
+    }
   }, []);
 
   useEffect(() => {
@@ -93,6 +51,7 @@ export default function ChatAssistant() {
     if (key) {
       localStorage.setItem('hf_api_key', key);
       setApiKey(key);
+      hfRef.current = new HfInference(key);
       setShowApiKeyModal(false);
       setIsOpen(true);
     }
@@ -101,8 +60,8 @@ export default function ChatAssistant() {
   const clearApiKey = () => {
     if (window.confirm("Hapus API Key dan reset chat?")) {
       localStorage.removeItem('hf_api_key');
-      localStorage.removeItem('hf_model_idx');
       setApiKey('');
+      hfRef.current = null;
       setIsOpen(false);
       setMessages([
         { role: 'assistant', content: 'Halo! Saya Asisten AI Sensus BPS. Ada yang bisa saya bantu terkait KBLI, kelogisan data, atau konsep survei?' }
@@ -110,15 +69,9 @@ export default function ChatAssistant() {
     }
   };
 
-  const handleModelChange = (e) => {
-    const idx = parseInt(e.target.value);
-    setSelectedModelIdx(idx);
-    localStorage.setItem('hf_model_idx', idx.toString());
-  };
-
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!inputMessage.trim() || !apiKey || isLoading) return;
+    if (!inputMessage.trim() || !apiKey || isLoading || !hfRef.current) return;
 
     const userText = inputMessage.trim();
     setInputMessage('');
@@ -127,60 +80,36 @@ export default function ChatAssistant() {
     setMessages(newMessages);
     setIsLoading(true);
 
-    const model = MODELS[selectedModelIdx];
-
     try {
-      const prompt = buildPrompt(model.template, newMessages);
+      // Build chat messages for the SDK
+      const chatMessages = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...newMessages.map(msg => ({ role: msg.role, content: msg.content }))
+      ];
 
-      const response = await fetch(`https://api-inference.huggingface.co/models/${model.id}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 512,
-            temperature: 0.7,
-            return_full_text: false,
-            do_sample: true,
-          }
-        })
+      const response = await hfRef.current.chatCompletion({
+        model: 'mistralai/Mistral-7B-Instruct-v0.3',
+        messages: chatMessages,
+        max_tokens: 512,
+        temperature: 0.7,
       });
 
-      if (response.status === 401) {
-        throw new Error('Token tidak valid. Pastikan HF Token Anda benar.');
-      }
-      if (response.status === 503) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(`Model sedang dimuat (estimasi ${Math.round((errData.estimated_time || 30))}s). Coba lagi sebentar...`);
-      }
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || `Error ${response.status}`);
-      }
+      const reply = response.choices?.[0]?.message?.content || 'Maaf, tidak ada respons.';
+      setMessages(prev => [...prev, { role: 'assistant', content: reply.trim() }]);
 
-      const data = await response.json();
-      
-      let reply = '';
-      if (Array.isArray(data) && data.length > 0) {
-        reply = data[0].generated_text || '';
-      } else if (data.generated_text) {
-        reply = data.generated_text;
-      } else {
-        throw new Error('Format respons tidak dikenali.');
-      }
-
-      // Clean up the reply
-      reply = reply.trim();
-      if (!reply) reply = 'Maaf, saya tidak bisa merespons saat ini. Coba ulangi pertanyaan Anda.';
-
-      setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch (error) {
-      const errorMsg = error.message.includes('Failed to fetch') 
-        ? 'Tidak bisa terhubung ke Hugging Face. Periksa koneksi internet atau coba model lain.'
-        : error.message;
+      let errorMsg = error.message || 'Terjadi kesalahan.';
+      
+      if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+        errorMsg = '🔑 Token tidak valid. Klik ⚙️ untuk memasukkan ulang token.';
+      } else if (errorMsg.includes('503') || errorMsg.includes('loading')) {
+        errorMsg = '⏳ Model sedang dimuat. Tunggu 30 detik lalu coba lagi...';
+      } else if (errorMsg.includes('429') || errorMsg.includes('rate')) {
+        errorMsg = '⏳ Terlalu banyak permintaan. Tunggu sebentar...';
+      } else if (errorMsg.includes('Failed to fetch') || errorMsg.includes('network')) {
+        errorMsg = '🌐 Masalah koneksi. Periksa internet Anda.';
+      }
+      
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${errorMsg}` }]);
     } finally {
       setIsLoading(false);
@@ -225,15 +154,7 @@ export default function ChatAssistant() {
           <div className="chat-header">
             <div style={{ flex: 1 }}>
               <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-primary)' }}>🤖 AI Assistant Sensus</h3>
-              <select 
-                value={selectedModelIdx} 
-                onChange={handleModelChange}
-                style={{ fontSize: '0.7rem', color: 'var(--success)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, marginTop: '2px' }}
-              >
-                {MODELS.map((m, idx) => (
-                  <option key={m.id} value={idx} style={{ color: 'black' }}>{m.name}</option>
-                ))}
-              </select>
+              <span style={{ fontSize: '0.75rem', color: 'var(--success)' }}>Mistral 7B via Hugging Face</span>
             </div>
             <button onClick={clearApiKey} title="Hapus API Key" style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1rem' }}>
               ⚙️
