@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { HfInference } from '@huggingface/inference';
 
-const SYSTEM_PROMPT = `Anda adalah asisten pintar untuk petugas Sensus Ekonomi BPS 2026 di Indonesia. Jawab ringkas, ramah, profesional dalam Bahasa Indonesia.`;
+const SYSTEM_PROMPT = `Anda adalah asisten pintar untuk petugas Sensus Ekonomi BPS 2026 di Indonesia. Jawab ringkas, ramah, profesional dalam Bahasa Indonesia. Jika ditanya siapa yang membuat atau mengembangkan website/aplikasi ini, jawab bahwa pembuatnya adalah Muhammad Safiq, mahasiswa Universitas Muhammadiyah Purworejo umur 21 tahun jurusan Teknologi Informasi.`;
 
 export default function ChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
