@@ -81,13 +81,13 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
 
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
-      <div className="card-header" style={{ borderBottomColor: '#84cc16' }}>
-        <h2 className="card-title" style={{ color: '#84cc16' }}>🌾 Kalkulator UTP Padi Sawah</h2>
+      <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}><Wheat size={24} color="var(--accent-primary)" /> Kalkulator UTP Padi Sawah</h2>
       </div>
 
-      <div className="grid-layout" style={{ gap: '1rem', marginBottom: '1.5rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+      <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         <div className="input-group">
-          <label>Luas (Ubin)</label>
+          <label>Konversi Luas (Ubin)</label>
           <input 
             type="number" 
             className="input-field" 
@@ -95,6 +95,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             value={luasUbin}
             onChange={handleUbinChange}
             onFocus={(e) => e.target.select()}
+            style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)' }}
           />
         </div>
         <div className="input-group">
@@ -106,13 +107,13 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             value={luasMeter}
             onChange={handleMeterChange}
             onFocus={(e) => e.target.select()}
-            style={{ background: 'rgba(132, 204, 22, 0.1)', borderColor: '#84cc16' }}
+            style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)' }}
           />
         </div>
       </div>
 
       {/* --- STATUS KEPEMILIKAN --- */}
-      <div style={{ marginBottom: '2rem', padding: '1rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: 'var(--radius-sm)' }}>
+      <div style={{ marginBottom: '2rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)' }}>
         <h4 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Status Lahan</h4>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           {['Sendiri', 'Maro'].map((mode) => (
@@ -121,7 +122,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
               onClick={() => setStatusKepemilikan(mode)}
               style={{ 
                 flex: 1, padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
-                background: statusKepemilikan === mode ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)',
+                background: statusKepemilikan === mode ? 'var(--accent-primary)' : 'var(--bg-secondary)',
                 color: statusKepemilikan === mode ? 'white' : 'var(--text-secondary)',
                 fontWeight: statusKepemilikan === mode ? 'bold' : 'normal',
                 transition: 'all 0.2s'
@@ -264,11 +265,10 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden }) {
             <span style={{ color: 'var(--accent-secondary)', fontWeight: 'bold' }}>Rata-rata Bersih Per Bulan: {formatCurrency(netProfitTahunan / 12)}</span>
           </div>
           
-          {/* Kesimpulan Manusiawi */}
           <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: 'var(--radius-sm)', borderLeft: '4px solid var(--accent-primary)', textAlign: 'left', fontStyle: 'italic', color: 'var(--text-primary)' }}>
             <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
             "Berdasarkan data yang Bapak/Ibu berikan, lahan seluas 
-            <strong style={{ color: '#84cc16' }}> {luasUbin ? `${luasUbin} ubin` : '...'} </strong> 
+            <strong style={{ color: 'var(--accent-primary)' }}> {luasUbin ? `${luasUbin} ubin` : '...'} </strong> 
             ini {statusKepemilikan === 'Maro' ? <span><strong>digarap secara bagi hasil ({persentaseMaro}%)</strong> dan </span> : ''} bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. 
             Setelah dipotong semua biaya modal (traktor, buruh, pupuk, dll), perkiraan penghasilan bersih Bapak/Ibu adalah sekitar 
             <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfitTahunan / 12)} per bulannya</strong>. 

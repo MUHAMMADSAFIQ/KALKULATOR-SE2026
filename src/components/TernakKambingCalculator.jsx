@@ -46,22 +46,22 @@ export default function TernakKambingCalculator() {
 
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
-      <div className="card-header" style={{ borderBottomColor: '#10b981' }}>
-        <h2 className="card-title" style={{ color: '#10b981' }}>🐐 Kalkulator Peternakan Kambing Potong</h2>
+      <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}>🐐 Kalkulator Peternakan Kambing Potong</h2>
       </div>
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pemasukan */}
         <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: '#10b981', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27.a Nilai Barang dan Jasa</h3>
-          <CurrencyInput label="Penjualan Kambing Potong" value={income.penjualanKambing} onChange={(v) => updateIncome('penjualanKambing', v)} />
-          <CurrencyInput label="Penjualan Kotoran Kambing (Pupuk)" value={income.penjualanKotoran} onChange={(v) => updateIncome('penjualanKotoran', v)} />
-          <CurrencyInput label="Penjualan Kulit / Kepala / Tulang" value={income.penjualanKulit} onChange={(v) => updateIncome('penjualanKulit', v)} />
-          <CurrencyInput label="Penjualan Kambing Tidak Produktif (Afkir)" value={income.penjualanAfkir} onChange={(v) => updateIncome('penjualanAfkir', v)} />
+          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27.a Nilai Barang dan Jasa</h3>
+          <CurrencyInput label="Penjualan Kambing Siap Potong" value={income.penjualanUtama} onChange={(v) => updateIncome('penjualanUtama', v)} />
+          <CurrencyInput label="Penjualan Anakan (Cempe)" value={income.penjualanAnakan} onChange={(v) => updateIncome('penjualanAnakan', v)} />
+          <CurrencyInput label="Penjualan Kotoran/Pupuk Kandang" value={income.penjualanKotoran} onChange={(v) => updateIncome('penjualanKotoran', v)} />
+          <CurrencyInput label="Pendapatan Lainnya" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
           
-          <div className="result-box" style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: '#10b981', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Nilai Barang & Jasa</span>
-            <span className="result-value" style={{ color: '#10b981' }}>{formatCurrency(totalIncome)}</span>
+          <div className="result-box" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)', marginTop: '2rem' }}>
+            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
+            <span className="result-value" style={{ color: 'var(--accent-primary)' }}>{formatCurrency(totalIncome)}</span>
           </div>
           
           <ProbingInput title="Estimasi Probing Pendapatan (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />

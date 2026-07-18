@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Store, TrendingUp, TrendingDown } from 'lucide-react';
 import CurrencyInput from './CurrencyInput';
 import ProbingInput from './ProbingInput';
 import { formatCurrency } from '../utils';
@@ -33,14 +34,14 @@ export default function WarungCalculator() {
 
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-lg)' }}>
-      <div className="card-header" style={{ borderBottomColor: 'var(--success)' }}>
-        <h2 className="card-title" style={{ color: 'var(--success)' }}>🏪 Kalkulator Usaha Warung Kelontong</h2>
+      <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Store size={20} /> Kalkulator Usaha Warung Kelontong</h2>
       </div>
       
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pendapatan */}
         <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: 'var(--success)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 Pemasukan (Pendapatan)</h3>
+          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingUp size={18} /> Pemasukan (Pendapatan)</h3>
           <CurrencyInput label="27.a - Total Penjualan Barang" value={income.penjualanBarang} onChange={(v) => updateIncome('penjualanBarang', v)} />
           <CurrencyInput label="27.b - Pendapatan Lain (Kardus, Konsinyasi)" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
           
@@ -54,7 +55,7 @@ export default function WarungCalculator() {
 
         {/* Kolom Pengeluaran */}
         <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 Pengeluaran (Biaya)</h3>
+          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><TrendingDown size={18} /> Pengeluaran (Biaya)</h3>
           <CurrencyInput label="26.a - Upah & Gaji Pekerja" value={expenses.upahGaji} onChange={(v) => updateExpense('upahGaji', v)} />
           <CurrencyInput label="26.b - Biaya Perlengkapan (Plastik, dll)" value={expenses.biayaProduksi} onChange={(v) => updateExpense('biayaProduksi', v)} />
           <CurrencyInput label="26.c - Pembelian Barang Dagangan" value={expenses.pembelianBarang} onChange={(v) => updateExpense('pembelianBarang', v)} />

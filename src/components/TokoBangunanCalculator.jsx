@@ -29,20 +29,20 @@ export default function TokoBangunanCalculator() {
 
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
-      <div className="card-header" style={{ borderBottomColor: '#3b82f6' }}>
-        <h2 className="card-title" style={{ color: '#3b82f6' }}>🧱 Kalkulator Usaha Toko Bangunan</h2>
+      <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}>🧱 Kalkulator Usaha Toko Bangunan</h2>
       </div>
 
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pemasukan */}
         <div style={{ background: 'rgba(59, 130, 246, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-          <h3 style={{ color: '#3b82f6', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27. Rincian Nilai Produksi / Pendapatan</h3>
-          <CurrencyInput label="27.a - Penjualan Barang (Semen, Besi, dll)" value={income.nilaiProduksi} onChange={(v) => updateIncome('nilaiProduksi', v)} />
-          <CurrencyInput label="27.b - Pendapatan Lain (Bunga bank, bonus, kardus)" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
+          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27. Rincian Nilai Produksi / Pendapatan</h3>
+          <CurrencyInput label="27.a - Penjualan Bahan Bangunan" value={income.penjualanBahan} onChange={(v) => updateIncome('penjualanBahan', v)} />
+          <CurrencyInput label="27.b - Penjualan Barang Lainnya" value={income.penjualanLain} onChange={(v) => updateIncome('penjualanLain', v)} />
           
-          <div className="result-box" style={{ background: 'rgba(59, 130, 246, 0.1)', borderColor: '#3b82f6', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
-            <span className="result-value" style={{ color: '#3b82f6' }}>{formatCurrency(totalIncome)}</span>
+          <div className="result-box" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)', marginTop: '2rem' }}>
+            <span className="result-label">Total Pendapatan Tahunan</span>
+            <span className="result-value" style={{ color: 'var(--accent-primary)' }}>{formatCurrency(totalIncome)}</span>
           </div>
           
           <ProbingInput title="Estimasi Probing Pendapatan (Tahunan)" type="income" onChange={setAnnualOmsetProbing} />
