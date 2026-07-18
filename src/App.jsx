@@ -25,6 +25,17 @@ function App() {
   // Identitas Responden (Global)
   const [namaResponden, setNamaResponden] = useState('');
 
+  // Tema
+  const [theme, setTheme] = useState('dark');
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('theme-light');
+    } else {
+      document.body.classList.remove('theme-light');
+    }
+  }, [theme]);
+
   // Pengeluaran Rumah Tangga (Global)
   const [totalWeekly, setTotalWeekly] = useState(0);
   const [totalMonthly, setTotalMonthly] = useState(0);
@@ -54,6 +65,12 @@ function App() {
             style={{ background: 'transparent', border: '1px solid var(--accent-secondary)', color: 'var(--accent-secondary)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             🔄 Reset Data Baru
+          </button>
+          <button 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            style={{ background: 'transparent', border: '1px solid var(--warning)', color: 'var(--warning)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            {theme === 'dark' ? '☀️ Mode Terang' : '🌙 Mode Gelap'}
           </button>
           <button 
             onClick={() => setIsAuthenticated(false)}
