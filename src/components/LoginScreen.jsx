@@ -14,8 +14,23 @@ export default function LoginScreen({ onLogin }) {
   };
 
   return (
-    <div className="login-container">
-      <div className="glass-card login-card" style={{ maxWidth: '400px', margin: '10vh auto', textAlign: 'center' }}>
+    <div 
+      className="login-container"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundImage: `url('/background.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        position: 'relative'
+      }}
+    >
+      <div style={{ position: 'absolute', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 0 }} />
+
+      <div className="glass-card login-card" style={{ maxWidth: '400px', width: '90%', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1, backgroundColor: 'var(--bg-secondary)', padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
         <h1 style={{ fontSize: '2rem', color: 'var(--accent-primary)', marginBottom: '0.5rem' }}>BPS 2026</h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Sensus Ekonomi & Kalkulator Sosial Ekonomi</p>
         
@@ -54,6 +69,26 @@ export default function LoginScreen({ onLogin }) {
             Masuk ke Aplikasi
           </button>
         </form>
+      </div>
+
+      <div style={{
+        position: 'absolute',
+        bottom: '20px',
+        zIndex: 1,
+        color: '#f8fafc',
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        padding: '0.5rem 1rem',
+        borderRadius: '30px',
+        backdropFilter: 'blur(4px)',
+        fontSize: '0.85rem',
+        fontWeight: '500',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        border: '1px solid rgba(255,255,255,0.1)',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+      }}>
+        ✨ <span>by <strong>muhammad safiq</strong> | follow ig <strong>@_mhmdsfq</strong></span>
       </div>
     </div>
   );
