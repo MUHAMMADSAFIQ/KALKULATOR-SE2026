@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import bgImage from '../assets/background.jpg';
 
 export default function LoginScreen({ onLogin }) {
   const [kode, setKode] = useState('');
@@ -22,7 +23,7 @@ export default function LoginScreen({ onLogin }) {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundImage: `url('/background.jpg')`,
+        backgroundImage: `url(${bgImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         position: 'relative'
