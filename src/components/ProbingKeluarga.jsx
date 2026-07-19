@@ -49,10 +49,20 @@ export default function ProbingKeluarga({ initialData, onSaved }) {
   const pengeluaranSebulan = listrik + internet + (makanSeminggu * 4) + actualBukanMakanBulanan + (actualBukanMakanTahunan / 12);
   const selisih = pendapatanSebulan - pengeluaranSebulan;
 
-  // Kepemilikan Aset (Blok 17)
+  // Kepemilikan Aset (Blok 17 dsb)
   const [gas3kg, setGas3kg] = useState(initialData?.rawState?.gas3kg ?? 0);
   const [gas5kg, setGas5kg] = useState(initialData?.rawState?.gas5kg ?? 0);
   const [kulkas, setKulkas] = useState(initialData?.rawState?.kulkas ?? 0);
+  const [ac, setAc] = useState(initialData?.rawState?.ac ?? 0);
+  const [motor, setMotor] = useState(initialData?.rawState?.motor ?? 0);
+  const [mobil, setMobil] = useState(initialData?.rawState?.mobil ?? 0);
+  const [emas, setEmas] = useState(initialData?.rawState?.emas ?? 0);
+  const [komputer, setKomputer] = useState(initialData?.rawState?.komputer ?? 0);
+  const [luasTanahLain, setLuasTanahLain] = useState(initialData?.rawState?.luasTanahLain ?? 0); // m2
+  const [luasSawah, setLuasSawah] = useState(initialData?.rawState?.luasSawah ?? 0); // ubin
+  const [nilaiBangunanLain, setNilaiBangunanLain] = useState(initialData?.rawState?.nilaiBangunanLain ?? 0); // Rp
+
+  const totalNilaiTanahSawah = (luasTanahLain * 1000000) + (luasSawah * 350000);
 
   const getRawState = () => ({
     namaKK, noBangunan,
@@ -61,7 +71,7 @@ export default function ProbingKeluarga({ initialData, onSaved }) {
     bukanMakanBulanan: actualBukanMakanBulanan,
     bukanMakanTahunan: actualBukanMakanTahunan,
     pendapatanSebulan, pengeluaranSebulan, selisih,
-    gas3kg, gas5kg, kulkas,
+    gas3kg, gas5kg, kulkas, ac, motor, mobil, emas, komputer, luasTanahLain, luasSawah, nilaiBangunanLain, totalNilaiTanahSawah,
     b_air, b_transport, b_spp, b_sabun, b_lain,
     t_pbb, t_pajak, t_baju, t_acara, t_lain
   });
@@ -240,26 +250,66 @@ export default function ProbingKeluarga({ initialData, onSaved }) {
           </p>
         </div>
 
-        {/* BLOK 17: ASET */}
+        {/* BLOK 17 & ASET LAINNYA */}
         <div className="calculation-section" style={{ background: 'transparent' }}>
           <div className="section-header">
             <span className="section-icon"><Package size={20} color="#f97316" /></span>
             <h3 className="section-title" style={{ color: '#f97316' }}>KETERANGAN KEPEMILIKAN ASET</h3>
           </div>
-          <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>17. Apakah keluarga ini memiliki barang-barang sebagai berikut? Berapa jumlahnya? :</p>
+          <p style={{ fontSize: '0.9rem', marginBottom: '1rem' }}>Apakah keluarga ini memiliki barang-barang sebagai berikut? Berapa jumlahnya? :</p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
             <div className="input-group">
-              <label>a. Tabung gas 3 kg (unit)</label>
+              <label>Tabung gas 3 kg (unit)</label>
               <input type="number" className="input-field" value={gas3kg} onChange={(e) => setGas3kg(parseInt(e.target.value) || 0)} min="0" />
             </div>
             <div className="input-group">
-              <label>b. Tabung gas 5,5 kg atau lebih (unit)</label>
+              <label>Tabung gas 5,5 kg atau lebih (unit)</label>
               <input type="number" className="input-field" value={gas5kg} onChange={(e) => setGas5kg(parseInt(e.target.value) || 0)} min="0" />
             </div>
             <div className="input-group">
-              <label>c. Lemari es/kulkas (unit)</label>
+              <label>Lemari es/kulkas (unit)</label>
               <input type="number" className="input-field" value={kulkas} onChange={(e) => setKulkas(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+            <div className="input-group">
+              <label>AC (unit)</label>
+              <input type="number" className="input-field" value={ac} onChange={(e) => setAc(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+            <div className="input-group">
+              <label>Sepeda Motor (unit)</label>
+              <input type="number" className="input-field" value={motor} onChange={(e) => setMotor(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+            <div className="input-group">
+              <label>Mobil (unit)</label>
+              <input type="number" className="input-field" value={mobil} onChange={(e) => setMobil(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+            <div className="input-group">
+              <label>Komputer / Laptop (unit)</label>
+              <input type="number" className="input-field" value={komputer} onChange={(e) => setKomputer(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+            <div className="input-group">
+              <label>Perhiasan Emas (gram)</label>
+              <input type="number" className="input-field" value={emas} onChange={(e) => setEmas(parseInt(e.target.value) || 0)} min="0" />
+            </div>
+
+            <div style={{ marginTop: '1rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
+              <p style={{ fontSize: '0.9rem', marginBottom: '1rem', fontWeight: 'bold' }}>Aset Tanah & Bangunan (Selain Tempat Tinggal):</p>
+              <div className="input-group">
+                <label>Luas Tanah Lainnya (m²)</label>
+                <input type="number" className="input-field" value={luasTanahLain} onChange={(e) => setLuasTanahLain(parseFloat(e.target.value) || 0)} min="0" placeholder="Otomatis dihitung Rp 1.000.000/m²" />
+              </div>
+              <div className="input-group">
+                <label>Luas Sawah (Ubin)</label>
+                <input type="number" className="input-field" value={luasSawah} onChange={(e) => setLuasSawah(parseFloat(e.target.value) || 0)} min="0" placeholder="Otomatis dihitung Rp 350.000/ubin" />
+              </div>
+              <CurrencyInput 
+                label="Nilai Bangunan Lain (Rp)" 
+                value={nilaiBangunanLain} 
+                onChange={setNilaiBangunanLain} 
+              />
+              <div style={{ marginTop: '0.8rem', padding: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '4px', fontWeight: 'bold', borderLeft: '4px solid var(--success)' }}>
+                Taksiran Nilai Tanah & Sawah: {formatCurrency(totalNilaiTanahSawah)}
+              </div>
             </div>
           </div>
         </div>
@@ -296,8 +346,15 @@ export default function ProbingKeluarga({ initialData, onSaved }) {
             <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', color: selisih >= 0 ? 'var(--success)' : 'var(--danger)' }}>
               <span>Selisih</span> <strong>{formatCurrency(selisih)}</strong>
             </li>
-            <li style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
+            <li style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', borderTop: '1px solid var(--glass-border)', paddingTop: '0.5rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <span style={{ width: '100%', fontWeight: 'bold' }}>Barang Elektronik / Otomotif:</span>
               <span>Gas 3kg / Gas 5kg / Kulkas</span> <strong>{gas3kg} / {gas5kg} / {kulkas} unit</strong>
+              <span style={{ width: '100%' }}>AC: <strong>{ac}</strong> | Motor: <strong>{motor}</strong> | Mobil: <strong>{mobil}</strong> | PC/Laptop: <strong>{komputer}</strong> | Emas: <strong>{emas} gr</strong></span>
+            </li>
+            <li style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '0.5rem', flexWrap: 'wrap' }}>
+              <span style={{ width: '100%', fontWeight: 'bold' }}>Tanah & Bangunan (Selain Tempat Tinggal):</span>
+              <span>Taksiran Nilai Tanah & Sawah</span> <strong>{formatCurrency(totalNilaiTanahSawah)}</strong>
+              <span>Taksiran Bangunan Lain</span> <strong>{formatCurrency(nilaiBangunanLain)}</strong>
             </li>
           </ul>
         </div>
