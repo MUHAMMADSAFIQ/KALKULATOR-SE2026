@@ -7,7 +7,7 @@ import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
 import TahunBerdiriSelector from './TahunBerdiriSelector';
 
-export default function UtpPadiCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
+export default function PertanianCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
   const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
   const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
   const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
@@ -91,13 +91,13 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
   const [bawonFraction, setBawonFraction] = useState(initialData?.rawState?.bawonFraction ?? (1/7));
 
   // Kalkulasi
-  const panenGabah = modePendapatan === 'Kuintal' 
+  const panenHasil = modePendapatan === 'Kuintal' 
     ? parseFloat(jumlahKuintal || 0) * parseFloat(hargaKuintal || 0)
     : parseFloat(pendapatanUang || 0);
 
   // 1. Potongan Bawon (Biaya Panen otomatis)
-  const biayaBawon = panenGabah * bawonFraction;
-  const sisaBawon = panenGabah - biayaBawon;
+  const biayaBawon = panenHasil * bawonFraction;
+  const sisaBawon = panenHasil - biayaBawon;
 
   // 2. Bagi Hasil Lahan
   const pendapatanKotorPenggarap = statusKepemilikan === 'Maro' 
@@ -124,7 +124,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
   const getRawState = () => ({ luasUbin, luasMeter, frekuensiPanen, statusKepemilikan, persentaseMaro, modeBiaya, modalGlobal, expenses, modePendapatan, jumlahKuintal, hargaKuintal, pendapatanUang, bawonFraction });
 
   const buildRecord = (status, catatan = '', namaDraft = '') => {
-    const defaultTotalIncome = typeof totalIncome !== 'undefined' ? totalIncome : (typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof panenGabah !== 'undefined' ? panenGabah * frekuensiPanen : (typeof income !== 'undefined' ? income : 0)));
+    const defaultTotalIncome = typeof totalIncome !== 'undefined' ? totalIncome : (typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof panenHasil !== 'undefined' ? panenHasil * frekuensiPanen : (typeof income !== 'undefined' ? income : 0)));
     const defaultTotalExpense = typeof totalExpense !== 'undefined' ? totalExpense : (typeof expense !== 'undefined' ? expense : 0);
     const defaultNetTahunan = typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof labaTahun !== 'undefined' ? labaTahun : 0);
     
@@ -154,10 +154,12 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
     if(onSaved) onSaved();
   };
   
+  const title = activeKbli?.name || "Kalkulator Usaha Pertanian";
+
   return (
     <div className="glass-card" style={{ gridColumn: '1 / -1', marginTop: 'var(--spacing-md)' }}>
       <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
-        <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}><Wheat size={24} color="var(--accent-primary)" /> Kalkulator UTP Padi Sawah</h2>
+        <h2 className="card-title" style={{ color: 'var(--accent-primary)' }}><Wheat size={24} color="var(--accent-primary)" /> {title}</h2>
       </div>
       <TahunBerdiriSelector tahunBerdiri={tahunBerdiri} setTahunBerdiri={setTahunBerdiri} bulanBerdiri={bulanBerdiri} setBulanBerdiri={setBulanBerdiri} />
 
@@ -293,7 +295,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
           {modePendapatan === 'Kuintal' ? (
             <>
               <div className="input-group">
-                <label>Jumlah Gabah (Kuintal)</label>
+                <label>Jumlah Hasil Panen (Kuintal)</label>
                 <input 
                   type="number" 
                   className="input-field" 
@@ -328,7 +330,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
           <div className="subtotal" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
               <span>Panen Kotor:</span>
-              <span>{formatCurrency(panenGabah)}</span>
+              <span>{formatCurrency(panenHasil)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--danger)' }}>
               <span>Biaya Panen / Bawon:</span>
@@ -361,7 +363,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
           const fasihBiayaNonOperasional = 0;
           const fasihTotalPengeluaran = fasihUpahBuruh + fasihBiayaProduksi + fasihSewaLahan + fasihBiayaOperasional + fasihBiayaNonOperasional;
 
-          const fasihTotalPendapatan = panenGabah * frekuensiPanen;
+          const fasihTotalPendapatan = panenHasil * frekuensiPanen;
           const fasihPendapatanLainnya = 0;
           const fasihTotalProduksi = fasihTotalPendapatan + fasihPendapatanLainnya;
 

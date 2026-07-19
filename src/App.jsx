@@ -1,29 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { Printer, RefreshCw, LogOut, Sun, Moon, Briefcase, Building2, ShoppingCart, FolderArchive, BarChart3, Search, Users } from 'lucide-react';
+import { Printer, RefreshCw, LogOut, Sun, Moon, Briefcase, FolderArchive, MapPin, Users } from 'lucide-react';
 import LoginScreen from './components/LoginScreen';
 import SearchKbli from './components/SearchKbli';
-import UtpPadiCalculator from './components/UtpPadiCalculator';
+import PertanianCalculator from './components/PertanianCalculator';
 import IndustriTempeCalculator from './components/IndustriTempeCalculator';
 import PeternakanCalculator from './components/PeternakanCalculator';
 import TokoBangunanCalculator from './components/TokoBangunanCalculator';
 import AirIsiUlangCalculator from './components/AirIsiUlangCalculator';
 import WarungCalculator from './components/WarungCalculator';
 import GenericBusinessCalculator from './components/GenericBusinessCalculator';
-import AssetCalculator from './components/AssetCalculator';
 import ArchiveTab from './components/ArchiveTab';
 import ChatAssistant from './components/ChatAssistant';
 import QuickCalculator from './components/QuickCalculator';
 import ProbingKeluarga from './components/ProbingKeluarga';
-import { formatCurrency } from './utils';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeKbli, setActiveKbli] = useState(null);
-  const [activeTab, setActiveTab] = useState('usaha'); // 'usaha', 'aset', 'keluarga', 'arsip'
+  const [activeTab, setActiveTab] = useState('sensus'); // 'sensus', 'arsip'
   const [activeDraft, setActiveDraft] = useState(null);
 
   // Identitas Responden (Global)
+  const [desa, setDesa] = useState('');
+  const [rt, setRt] = useState('');
+  const [rw, setRw] = useState('');
+  const [noBangunan, setNoBangunan] = useState('');
   const [namaResponden, setNamaResponden] = useState('');
+  
+  // Keranjang Usaha
+  const [addedBusinesses, setAddedBusinesses] = useState([]);
 
   // Tema
   const [theme, setTheme] = useState('dark');
@@ -36,17 +40,33 @@ function App() {
     }
   }, [theme]);
 
-  // (Pengeluaran Rumah Tangga global dihapus, karena sudah ditangani di ProbingKeluarga)
-
   if (!isAuthenticated) {
     return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
   }
+
+  const handleAddBusiness = (kbli) => {
+    // Prevent duplicate exact KBLI id if needed, but allow multiple same business if they want? 
+    // Usually they just need one form per KBLI.
+    if (!addedBusinesses.find(b => b.id === kbli.id)) {
+      setAddedBusinesses([...addedBusinesses, kbli]);
+    }
+  };
+
+  const handleRemoveBusiness = (index) => {
+    const newBusinesses = [...addedBusinesses];
+    newBusinesses.splice(index, 1);
+    setAddedBusinesses(newBusinesses);
+  };
+
+  const getFullNamaResponden = () => {
+    return `${namaResponden}${noBangunan ? ` - Bangunan ${noBangunan}` : ''}${desa ? ` - ${desa}` : ''}`;
+  };
 
   return (
     <div className="app-container">
       <header className="header no-print">
         <h1>Sensus Ekonomi 2026</h1>
-        <p>Aplikasi Pencatatan BPS - Kalkulator Usaha & Aset</p>
+        <p>Aplikasi Pencatatan BPS - Sensus Terpadu Satu Pintu</p>
         <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', marginTop: '1rem', flexWrap: 'wrap' }}>
           <button 
             onClick={() => window.print()}
@@ -58,7 +78,7 @@ function App() {
             onClick={() => window.location.reload()}
             style={{ background: 'transparent', border: '1px solid var(--accent-secondary)', color: 'var(--accent-secondary)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            <RefreshCw size={16} /> Reset Data Baru
+            <RefreshCw size={16} /> Reset Form Baru
           </button>
           <button 
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -75,116 +95,134 @@ function App() {
         </div>
       </header>
 
-
-      <main className="grid-layout fade-in-up">
-        {/* TAB 1: USAHA */}
-        {activeTab === 'usaha' && (
-          <div className="tab-content" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-            <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>👤 Nama Kepala Keluarga / Pemilik Usaha</label>
-              <input 
-                type="text" 
-                className="input-field" 
-                placeholder="Ketik nama responden di sini..." 
-                value={namaResponden}
-                onChange={(e) => setNamaResponden(e.target.value)}
-                style={{ fontSize: '1.1rem', background: 'rgba(255, 255, 255, 0.05)' }}
-              />
+      <main className="grid-layout fade-in-up" style={{ paddingBottom: '100px' }}>
+        {activeTab === 'sensus' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', gridColumn: '1 / -1' }}>
+            
+            {/* 1. IDENTITAS WILAYAH & RESPONDEN */}
+            <div className="glass-card">
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-primary)', marginBottom: '1.5rem' }}>
+                <MapPin size={24} /> Identitas Wilayah & Responden
+              </h2>
+              <div className="grid-layout" style={{ gap: '1rem', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                <div>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Desa / Kelurahan</label>
+                  <input type="text" className="input-field" value={desa} onChange={e => setDesa(e.target.value)} placeholder="Nama Desa..." />
+                </div>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>RT</label>
+                    <input type="text" className="input-field" value={rt} onChange={e => setRt(e.target.value)} placeholder="RT..." />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>RW</label>
+                    <input type="text" className="input-field" value={rw} onChange={e => setRw(e.target.value)} placeholder="RW..." />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>No. Urut Bangunan</label>
+                  <input type="text" className="input-field" value={noBangunan} onChange={e => setNoBangunan(e.target.value)} placeholder="Misal: 001..." />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>👤 Nama Kepala Keluarga / Responden</label>
+                  <input 
+                    type="text" 
+                    className="input-field" 
+                    value={namaResponden} 
+                    onChange={e => setNamaResponden(e.target.value)} 
+                    placeholder="Nama lengkap KRT..." 
+                    style={{ fontSize: '1.1rem', background: 'rgba(255, 255, 255, 0.05)', borderColor: 'var(--accent-primary)' }}
+                  />
+                </div>
+              </div>
             </div>
 
-            <SearchKbli onSelectUsaha={setActiveKbli} />
-            
-            {activeKbli && (
-              <div className="glass-card" style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: 'var(--success)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block' }}>Usaha Terpilih (Kategori {activeKbli.category}):</span>
-                  <strong style={{ fontSize: '1.1rem', color: 'var(--success)' }}>{activeKbli.name}</strong>
-                  <span style={{ marginLeft: '0.5rem', background: 'var(--success)', color: '#000', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                    KBLI: {activeKbli.code}
-                  </span>
+            {/* 2. PENCARIAN & DAFTAR USAHA */}
+            <div className="glass-card" style={{ background: 'rgba(59, 130, 246, 0.05)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#3b82f6', marginBottom: '1rem' }}>
+                <Briefcase size={24} /> Usaha yang Dimiliki Keluarga
+              </h2>
+              <SearchKbli onSelectUsaha={handleAddBusiness} />
+              
+              {addedBusinesses.length > 0 && (
+                <div style={{ marginTop: '1.5rem' }}>
+                  <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Daftar Usaha Terpilih (Otomatis ditambahkan di bawah):</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {addedBusinesses.map((kbli, idx) => (
+                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.8rem 1rem', borderRadius: '4px', borderLeft: '4px solid var(--accent-primary)' }}>
+                        <div>
+                          <strong style={{ color: 'var(--text-primary)' }}>{kbli.name}</strong>
+                          <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>KBLI: {kbli.code}</span>
+                        </div>
+                        <button onClick={() => handleRemoveBusiness(idx)} style={{ background: 'transparent', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.2rem 0.5rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>Hapus</button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <button 
-                  onClick={() => setActiveKbli(null)}
-                  style={{ background: 'transparent', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}
-                >
-                  Ganti
-                </button>
-              </div>
-            )}
+              )}
+            </div>
 
-            {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {activeKbli?.id === 'industri_tempe' && <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {(activeKbli?.id === 'ternak_kambing' || activeKbli?.name?.toLowerCase().includes('ternak') || activeKbli?.name?.toLowerCase().includes('peternakan')) && <PeternakanCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {activeKbli?.id === 'warung' && <WarungCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {/* 3. KALKULATOR USAHA (DILOOP) */}
+            {addedBusinesses.map((activeKbli, index) => {
+              const kbliId = activeKbli.id;
+              const kbliName = activeKbli.name.toLowerCase();
+              const fullNama = getFullNamaResponden();
+              
+              const isPertanian = kbliId === 'utp_padi' || kbliName.includes('tanaman') || kbliName.includes('hortikultura') || kbliName.includes('perkebunan') || kbliName.includes('kehutanan') || kbliName.includes('pertanian') || kbliName.includes('padi') || kbliName.includes('palawija') || kbliName.includes('sayur');
+              const isPeternakan = kbliId === 'ternak_kambing' || kbliName.includes('ternak') || kbliName.includes('peternakan');
+              const isIndustriTempe = kbliId === 'industri_tempe' || kbliName.includes('tempe') || kbliName.includes('tahu');
+              const isTokoBangunan = kbliId === 'toko_bangunan' || kbliName.includes('bahan bangunan');
+              const isAirIsiUlang = kbliId === 'air_isi_ulang' || kbliName.includes('air minum') || kbliName.includes('isi ulang');
+              const isWarung = kbliId === 'warung' || kbliName.includes('warung') || kbliName.includes('kelontong');
+              const isKilat = kbliId === 'kilat';
+
+              return (
+                <div key={`${kbliId}-${index}`} style={{ animation: 'fadeIn 0.5s ease', marginTop: '1rem' }}>
+                  <div style={{ background: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontWeight: 'bold' }}>
+                    Usaha #{index + 1}: {activeKbli.name}
+                  </div>
+                  {isPertanian ? <PertanianCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   isPeternakan ? <PeternakanCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   isIndustriTempe ? <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   isTokoBangunan ? <TokoBangunanCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   isAirIsiUlang ? <AirIsiUlangCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   isWarung ? <WarungCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   isKilat ? <QuickCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                   <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={fullNama} title={activeKbli.name} />}
+                </div>
+              );
+            })}
+
+            {/* 4. PROBING KELUARGA (PENGELUARAN & ASET) */}
+            <div style={{ marginTop: '2rem', borderTop: '2px dashed var(--glass-border)', paddingTop: '2rem' }}>
+              <div style={{ background: '#f59e0b', color: 'white', padding: '0.5rem 1rem', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Users size={18} /> Blok Probing Pengeluaran & Aset Keluarga
+              </div>
+              <ProbingKeluarga namaResponden={getFullNamaResponden()} />
+            </div>
             
-            {/* Fallback untuk KBLI lainnya */}
-            {(!['utp_padi', 'industri_tempe', 'toko_bangunan', 'air_isi_ulang', 'warung', 'kilat'].includes(activeKbli?.id) && !(activeKbli?.id === 'ternak_kambing' || activeKbli?.name?.toLowerCase().includes('ternak') || activeKbli?.name?.toLowerCase().includes('peternakan'))) && (
-              <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={namaResponden} title={activeKbli?.name || "Kalkulator Usaha Umum"} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />
-            )}
-
-            {!activeKbli && (
-              <div className="glass-card" style={{ textAlign: 'center', padding: '3rem 1rem', opacity: 0.7 }}>
-                <p>Belum ada usaha yang dipilih. Silakan cari dan pilih KBLI di atas.</p>
-              </div>
-            )}
-          </div>
-        )}
-
-
-
-        {/* TAB 3: PROBING KELUARGA */}
-        {activeTab === 'keluarga' && (
-          <div className="tab-content fade-in-up">
-            <ProbingKeluarga initialData={activeDraft} onSaved={() => setActiveDraft(null)} />
           </div>
         )}
 
         {activeTab === 'arsip' && (
-          <div className="fade-in">
+          <div className="fade-in" style={{ gridColumn: '1 / -1' }}>
             <ArchiveTab onContinueDraft={(draft) => {
-              if (draft.kbliCode === 'RT-000') {
-                setActiveDraft(draft);
-                setActiveTab('keluarga');
-              } else {
-                setActiveKbli({ id: draft.kbliId, name: draft.namaUsaha, code: draft.kbliCode, category: '' });
-                if (draft.namaResponden) setNamaResponden(draft.namaResponden);
-                setActiveDraft(draft);
-                setActiveTab('usaha');
-              }
+              alert("Fitur muat ulang arsip sedang disempurnakan untuk alur baru.");
             }} />
           </div>
         )}
       </main>
 
-      {/* Floating Chat Assistant */}
       <ChatAssistant />
 
-      {/* Bottom Navigation */}
       <nav className="bottom-nav no-print">
-        <button 
-          className={`nav-item ${activeTab === 'usaha' ? 'active' : ''}`}
-          onClick={() => setActiveTab('usaha')}
-        >
+        <button className={`nav-item ${activeTab === 'sensus' ? 'active' : ''}`} onClick={() => setActiveTab('sensus')}>
           <span className="nav-icon"><Briefcase size={24} strokeWidth={1.5} /></span>
-          <span className="nav-label">Usaha</span>
+          <span className="nav-label">Sensus Terpadu</span>
         </button>
-
-        <button 
-          className={`nav-item ${activeTab === 'keluarga' ? 'active' : ''}`}
-          onClick={() => setActiveTab('keluarga')}
-        >
-          <span className="nav-icon"><Users size={24} strokeWidth={1.5} /></span>
-          <span className="nav-label">Keluarga</span>
-        </button>
-        <button 
-          className={`nav-item ${activeTab === 'arsip' ? 'active' : ''}`}
-          onClick={() => setActiveTab('arsip')}
-        >
+        <button className={`nav-item ${activeTab === 'arsip' ? 'active' : ''}`} onClick={() => setActiveTab('arsip')}>
           <span className="nav-icon"><FolderArchive size={24} strokeWidth={1.5} /></span>
-          <span className="nav-label">Arsip</span>
+          <span className="nav-label">Arsip (Draft & Final)</span>
         </button>
       </nav>
     </div>
