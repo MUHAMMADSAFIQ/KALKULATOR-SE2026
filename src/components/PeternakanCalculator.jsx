@@ -43,18 +43,25 @@ export default function PeternakanCalculator({ activeKbli, namaResponden, initia
     pendapatanLainnya: 0,
   });
 
-  // Probing State
+  const [showRincianPengeluaran, setShowRincianPengeluaran] = useState(false);
+  const [showRincianPendapatan, setShowRincianPendapatan] = useState(false);
+
+  // Probing State (Global)
   const [annualOmsetProbing, setAnnualOmsetProbing] = useState(initialData?.rawState?.annualOmsetProbing ?? 0);
   const [annualModalProbing, setAnnualModalProbing] = useState(initialData?.rawState?.annualModalProbing ?? 0);
 
-  const totalExpense = Object.values(expenses).reduce((a, b) => a + b, 0) + annualModalProbing;
-  const totalIncome = Object.values(income).reduce((a, b) => a + b, 0) + annualOmsetProbing;
+  const rincianTotalExpense = Object.values(expenses).reduce((a, b) => a + b, 0);
+  const totalExpense = showRincianPengeluaran ? rincianTotalExpense : annualModalProbing;
+
+  const rincianTotalIncome = Object.values(income).reduce((a, b) => a + b, 0);
+  const totalIncome = showRincianPendapatan ? rincianTotalIncome : annualOmsetProbing;
+
   const netProfit = totalIncome - totalExpense;
 
   const updateExpense = (key, value) => setExpenses(prev => ({ ...prev, [key]: value }));
   const updateIncome = (key, value) => setIncome(prev => ({ ...prev, [key]: value }));
 
-  const getRawState = () => ({ tahunBerdiri, bulanBerdiri, luasKandangMeter, expenses, income, annualOmsetProbing, annualModalProbing });
+  const getRawState = () => ({ tahunBerdiri, bulanBerdiri, luasKandangMeter, expenses, income, annualOmsetProbing, annualModalProbing, showRincianPengeluaran, showRincianPendapatan });
 
   const buildRecord = (status, catatan = '', namaDraft = '') => {
     return {
@@ -107,60 +114,78 @@ export default function PeternakanCalculator({ activeKbli, namaResponden, initia
       <div className="grid-layout" style={{ gap: 'var(--spacing-md)' }}>
         {/* Kolom Pengeluaran */}
         <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-          <h3 style={{ color: 'var(--danger)', marginBottom: '1rem', fontSize: '1.1rem' }}>📉 Pengeluaran Usaha Peternakan</h3>
-          
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.a Tenaga Kerja (Bila Ada)</h4>
-          <CurrencyInput label="Upah Pegawai/Buruh Kandang" value={expenses.tenagaKerjaHarian} onChange={(v) => updateExpense('tenagaKerjaHarian', v)} />
-
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.b Biaya Produksi</h4>
-          <CurrencyInput label="Pembelian Bibit/DOC/Anakan" value={expenses.bibit} onChange={(v) => updateExpense('bibit', v)} />
-          <CurrencyInput label="Pakan Hijauan (Rumput, Daun)" value={expenses.pakanHijauan} onChange={(v) => updateExpense('pakanHijauan', v)} />
-          <CurrencyInput label="Pakan Konsentrat (Dedak, Jagung, Pur)" value={expenses.pakanKonsentrat} onChange={(v) => updateExpense('pakanKonsentrat', v)} />
-          <CurrencyInput label="Vaksin & Obat-obatan" value={expenses.vitaminObat} onChange={(v) => updateExpense('vitaminObat', v)} />
-          <CurrencyInput label="Perlengkapan Kandang" value={expenses.perlengkapanKandang} onChange={(v) => updateExpense('perlengkapanKandang', v)} />
-          <CurrencyInput label="Transportasi Pembelian" value={expenses.transportasiBeli} onChange={(v) => updateExpense('transportasiBeli', v)} />
-          <CurrencyInput label="Lain-lain (Terkait Produksi)" value={expenses.lainProduksi} onChange={(v) => updateExpense('lainProduksi', v)} />
-          
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.d Biaya Operasional</h4>
-          <CurrencyInput label="Sewa Kandang / Lahan (Bila Menyewa)" value={expenses.sewaKandang} onChange={(v) => updateExpense('sewaKandang', v)} />
-          <CurrencyInput label="Listrik" value={expenses.listrik} onChange={(v) => updateExpense('listrik', v)} />
-          <CurrencyInput label="Air" value={expenses.air} onChange={(v) => updateExpense('air', v)} />
-          <CurrencyInput label="Perawatan Kandang" value={expenses.perawatanKandang} onChange={(v) => updateExpense('perawatanKandang', v)} />
-          <CurrencyInput label="Transportasi (Operasional)" value={expenses.transportasiOps} onChange={(v) => updateExpense('transportasiOps', v)} />
-          <CurrencyInput label="Administrasi & Komunikasi" value={expenses.administrasiKomunikasi} onChange={(v) => updateExpense('administrasiKomunikasi', v)} />
-          
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.e Biaya Non-Operasional</h4>
-          <CurrencyInput label="Penyusutan Peralatan" value={expenses.penyusutanPeralatan} onChange={(v) => updateExpense('penyusutanPeralatan', v)} />
-          <CurrencyInput label="Pajak (PBB, Retribusi)" value={expenses.pajak} onChange={(v) => updateExpense('pajak', v)} />
-          <CurrencyInput label="Sumbangan / Keagamaan" value={expenses.sumbangan} onChange={(v) => updateExpense('sumbangan', v)} />
-          <CurrencyInput label="Iuran / Asuransi Ternak" value={expenses.iuranAsuransi} onChange={(v) => updateExpense('iuranAsuransi', v)} />
-          <CurrencyInput label="Biaya Lain-lain Non-Ops" value={expenses.biayaLainNonOps} onChange={(v) => updateExpense('biayaLainNonOps', v)} />
-
-          <div className="result-box" style={{ background: 'rgba(239, 68, 68, 0.2)', borderColor: 'var(--danger)', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pengeluaran</span>
-            <span className="result-value" style={{ color: 'var(--danger)' }}>{formatCurrency(totalExpense)}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ color: 'var(--danger)', fontSize: '1.1rem', margin: 0 }}>📉 Pengeluaran Tahunan</h3>
+            <button onClick={() => setShowRincianPengeluaran(!showRincianPengeluaran)} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', padding: '0.2rem 0.5rem', borderRadius: '4px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+              {showRincianPengeluaran ? 'Tutup Rincian' : 'Buka Rincian'}
+            </button>
           </div>
           
-          <ProbingInput title="Atau Masukkan Pengeluaran Total Secara Global" type="expense" onChange={setAnnualModalProbing} />
+          {showRincianPengeluaran ? (
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0' }}>26.a Tenaga Kerja (Bila Ada)</h4>
+              <CurrencyInput label="Upah Pegawai/Buruh Kandang" value={expenses.tenagaKerjaHarian} onChange={(v) => updateExpense('tenagaKerjaHarian', v)} />
+
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.b Biaya Produksi</h4>
+              <CurrencyInput label="Pembelian Bibit/DOC/Anakan" value={expenses.bibit} onChange={(v) => updateExpense('bibit', v)} />
+              <CurrencyInput label="Pakan Hijauan (Rumput, Daun)" value={expenses.pakanHijauan} onChange={(v) => updateExpense('pakanHijauan', v)} />
+              <CurrencyInput label="Pakan Konsentrat (Dedak, Jagung, Pur)" value={expenses.pakanKonsentrat} onChange={(v) => updateExpense('pakanKonsentrat', v)} />
+              <CurrencyInput label="Vaksin & Obat-obatan" value={expenses.vitaminObat} onChange={(v) => updateExpense('vitaminObat', v)} />
+              <CurrencyInput label="Perlengkapan Kandang" value={expenses.perlengkapanKandang} onChange={(v) => updateExpense('perlengkapanKandang', v)} />
+              <CurrencyInput label="Transportasi Pembelian" value={expenses.transportasiBeli} onChange={(v) => updateExpense('transportasiBeli', v)} />
+              <CurrencyInput label="Lain-lain (Terkait Produksi)" value={expenses.lainProduksi} onChange={(v) => updateExpense('lainProduksi', v)} />
+              
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.d Biaya Operasional</h4>
+              <CurrencyInput label="Sewa Kandang / Lahan (Bila Menyewa)" value={expenses.sewaKandang} onChange={(v) => updateExpense('sewaKandang', v)} />
+              <CurrencyInput label="Listrik" value={expenses.listrik} onChange={(v) => updateExpense('listrik', v)} />
+              <CurrencyInput label="Air" value={expenses.air} onChange={(v) => updateExpense('air', v)} />
+              <CurrencyInput label="Perawatan Kandang" value={expenses.perawatanKandang} onChange={(v) => updateExpense('perawatanKandang', v)} />
+              <CurrencyInput label="Transportasi (Operasional)" value={expenses.transportasiOps} onChange={(v) => updateExpense('transportasiOps', v)} />
+              <CurrencyInput label="Administrasi & Komunikasi" value={expenses.administrasiKomunikasi} onChange={(v) => updateExpense('administrasiKomunikasi', v)} />
+              
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>26.e Biaya Non-Operasional</h4>
+              <CurrencyInput label="Penyusutan Peralatan" value={expenses.penyusutanPeralatan} onChange={(v) => updateExpense('penyusutanPeralatan', v)} />
+              <CurrencyInput label="Pajak (PBB, Retribusi)" value={expenses.pajak} onChange={(v) => updateExpense('pajak', v)} />
+              <CurrencyInput label="Sumbangan / Keagamaan" value={expenses.sumbangan} onChange={(v) => updateExpense('sumbangan', v)} />
+              <CurrencyInput label="Iuran / Asuransi Ternak" value={expenses.iuranAsuransi} onChange={(v) => updateExpense('iuranAsuransi', v)} />
+              <CurrencyInput label="Biaya Lain-lain Non-Ops" value={expenses.biayaLainNonOps} onChange={(v) => updateExpense('biayaLainNonOps', v)} />
+
+              <div style={{ marginTop: '0.8rem', padding: '0.5rem', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--danger)', borderRadius: '4px', fontWeight: 'bold', borderLeft: '4px solid var(--danger)' }}>
+                Total Rincian: {formatCurrency(rincianTotalExpense)}
+              </div>
+            </div>
+          ) : (
+            <CurrencyInput label="Total Langsung Pengeluaran Tahunan (Rp)" value={annualModalProbing} onChange={setAnnualModalProbing} />
+          )}
         </div>
 
         {/* Kolom Pemasukan */}
         <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <h3 style={{ color: 'var(--accent-primary)', marginBottom: '1rem', fontSize: '1.1rem' }}>📈 27.a Nilai Barang dan Jasa</h3>
-          <CurrencyInput label="Penjualan Ternak Utama (Siap Potong/Jual)" value={income.penjualanUtama} onChange={(v) => updateIncome('penjualanUtama', v)} />
-          <CurrencyInput label="Penjualan Anakan (Cempe/DOC)" value={income.penjualanAnakan} onChange={(v) => updateIncome('penjualanAnakan', v)} />
-          <CurrencyInput label="Penjualan Produk Lain (Telur, Susu, dll)" value={income.penjualanLainnya} onChange={(v) => updateIncome('penjualanLainnya', v)} />
-          
-          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>27.b Pendapatan Lainnya</h4>
-          <CurrencyInput label="Penjualan Kotoran / Pupuk Kandang" value={income.penjualanKotoran} onChange={(v) => updateIncome('penjualanKotoran', v)} />
-          <CurrencyInput label="Pendapatan Lain-lainnya" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
-          
-          <div className="result-box" style={{ background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)', marginTop: '2rem' }}>
-            <span className="result-label" style={{ color: 'var(--text-primary)' }}>Total Pendapatan</span>
-            <span className="result-value" style={{ color: 'var(--accent-primary)' }}>{formatCurrency(totalIncome)}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ color: 'var(--accent-primary)', fontSize: '1.1rem', margin: 0 }}>📈 Pendapatan Tahunan</h3>
+            <button onClick={() => setShowRincianPendapatan(!showRincianPendapatan)} style={{ background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', padding: '0.2rem 0.5rem', borderRadius: '4px', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+              {showRincianPendapatan ? 'Tutup Rincian' : 'Buka Rincian'}
+            </button>
           </div>
-          
-          <ProbingInput title="Atau Masukkan Pendapatan Total Secara Global" type="income" onChange={setAnnualOmsetProbing} />
+
+          {showRincianPendapatan ? (
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '8px' }}>
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '0' }}>27.a Nilai Barang dan Jasa</h4>
+              <CurrencyInput label="Penjualan Ternak Utama (Siap Potong/Jual)" value={income.penjualanUtama} onChange={(v) => updateIncome('penjualanUtama', v)} />
+              <CurrencyInput label="Penjualan Anakan (Cempe/DOC)" value={income.penjualanAnakan} onChange={(v) => updateIncome('penjualanAnakan', v)} />
+              <CurrencyInput label="Penjualan Produk Lain (Telur, Susu, dll)" value={income.penjualanLainnya} onChange={(v) => updateIncome('penjualanLainnya', v)} />
+              
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '1rem' }}>27.b Pendapatan Lainnya</h4>
+              <CurrencyInput label="Penjualan Kotoran / Pupuk Kandang" value={income.penjualanKotoran} onChange={(v) => updateIncome('penjualanKotoran', v)} />
+              <CurrencyInput label="Pendapatan Lain-lainnya" value={income.pendapatanLainnya} onChange={(v) => updateIncome('pendapatanLainnya', v)} />
+              
+              <div style={{ marginTop: '0.8rem', padding: '0.5rem', background: 'rgba(16, 185, 129, 0.1)', color: 'var(--success)', borderRadius: '4px', fontWeight: 'bold', borderLeft: '4px solid var(--success)' }}>
+                Total Rincian: {formatCurrency(rincianTotalIncome)}
+              </div>
+            </div>
+          ) : (
+            <CurrencyInput label="Total Langsung Pendapatan Tahunan (Rp)" value={annualOmsetProbing} onChange={setAnnualOmsetProbing} />
+          )}
         </div>
       </div>
 
@@ -194,25 +219,25 @@ export default function PeternakanCalculator({ activeKbli, namaResponden, initia
               <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', borderLeft: '4px solid #f97316', lineHeight: '1.8' }}>
                 <div style={{ fontWeight: 'bold', color: 'var(--accent-primary)', marginBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>BLOK 26: PENGELUARAN TAHUNAN</div>
                 
-                {annualModalProbing > 0 && (
+                {!showRincianPengeluaran && (
                   <p style={{ color: 'var(--warning)', fontSize: '0.85rem', marginBottom: '1rem' }}>⚠️ Anda menggunakan input pengeluaran Global. Rincian di bawah diabaikan, hanya total yang akan dihitung.</p>
                 )}
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.95rem' }}>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>26.a. Upah/Gaji Pegawai</span> <strong>{formatCurrency(fasihUpahBuruh)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPengeluaran ? 0.5 : 1 }}>
+                    <span>26.a. Upah/Gaji Pegawai</span> <strong>{formatCurrency(showRincianPengeluaran ? fasihUpahBuruh : 0)}</strong>
                   </li>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>26.b. Biaya Produksi (Bibit, Pakan, Obat)</span> <strong>{formatCurrency(fasihBiayaProduksi)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPengeluaran ? 0.5 : 1 }}>
+                    <span>26.b. Biaya Produksi (Bibit, Pakan, Obat)</span> <strong>{formatCurrency(showRincianPengeluaran ? fasihBiayaProduksi : 0)}</strong>
                   </li>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>26.c. Biaya Jasa/Lainnya (Sewa Lahan)</span> <strong>{formatCurrency(fasihSewaLainnya)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPengeluaran ? 0.5 : 1 }}>
+                    <span>26.c. Biaya Jasa/Lainnya (Sewa Lahan)</span> <strong>{formatCurrency(showRincianPengeluaran ? fasihSewaLainnya : 0)}</strong>
                   </li>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>26.d. Biaya Operasional (Listrik, Air, Transport)</span> <strong>{formatCurrency(fasihBiayaOperasional)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPengeluaran ? 0.5 : 1 }}>
+                    <span>26.d. Biaya Operasional (Listrik, Air, Transport)</span> <strong>{formatCurrency(showRincianPengeluaran ? fasihBiayaOperasional : 0)}</strong>
                   </li>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>26.e. Biaya Non-Operasional (Pajak, Penyusutan)</span> <strong>{formatCurrency(fasihBiayaNonOperasional)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPengeluaran ? 0.5 : 1 }}>
+                    <span>26.e. Biaya Non-Operasional (Pajak, Penyusutan)</span> <strong>{formatCurrency(showRincianPengeluaran ? fasihBiayaNonOperasional : 0)}</strong>
                   </li>
                   <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '1rem', marginTop: '0.5rem', color: 'var(--danger)', fontWeight: 'bold' }}>
                     <span>26.f. TOTAL PENGELUARAN (a+b+c+d+e)</span> <strong>{formatCurrency(finalTotalPengeluaran)}</strong>
@@ -221,16 +246,16 @@ export default function PeternakanCalculator({ activeKbli, namaResponden, initia
 
                 <div style={{ fontWeight: 'bold', color: 'var(--accent-primary)', marginBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginTop: '1.5rem' }}>BLOK 27: PENDAPATAN TAHUNAN</div>
                 
-                {annualOmsetProbing > 0 && (
+                {!showRincianPendapatan && (
                   <p style={{ color: 'var(--warning)', fontSize: '0.85rem', marginBottom: '1rem' }}>⚠️ Anda menggunakan input pendapatan Global. Rincian di bawah diabaikan, hanya total yang akan dihitung.</p>
                 )}
 
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.95rem' }}>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>27.a. Nilai Produksi (Jual Ternak, Telur)</span> <strong>{formatCurrency(fasihTotalPendapatanUtama)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPendapatan ? 0.5 : 1 }}>
+                    <span>27.a. Nilai Produksi (Jual Ternak, Telur)</span> <strong>{formatCurrency(showRincianPendapatan ? fasihTotalPendapatanUtama : 0)}</strong>
                   </li>
-                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
-                    <span>27.b. Pendapatan Lainnya (Kotoran)</span> <strong>{formatCurrency(fasihPendapatanLain)}</strong>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem', opacity: !showRincianPendapatan ? 0.5 : 1 }}>
+                    <span>27.b. Pendapatan Lainnya (Kotoran)</span> <strong>{formatCurrency(showRincianPendapatan ? fasihPendapatanLain : 0)}</strong>
                   </li>
                   <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '1rem', marginTop: '0.5rem', color: 'var(--success)', fontWeight: 'bold' }}>
                     <span>27.c. TOTAL PENDAPATAN (a+b)</span> <strong>{formatCurrency(finalTotalPendapatan)}</strong>
