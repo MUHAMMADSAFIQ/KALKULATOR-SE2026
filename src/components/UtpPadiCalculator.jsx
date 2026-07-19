@@ -241,6 +241,43 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
       </div>
 
       <div className="grid-layout">
+        {/* KOLOM PENGELUARAN */}
+        <div className="calculation-section">
+          <div className="section-header">
+            <span className="section-icon"><Wallet size={24} color="var(--danger)" /></span>
+            <h3 className="section-title">Modal / Pengeluaran (Per Panen)</h3>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <button onClick={() => setModeBiaya('Global')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modeBiaya === 'Global' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modeBiaya === 'Global' ? 'white' : 'var(--accent-primary)' }}>Input Keseluruhan</button>
+            <button onClick={() => setModeBiaya('Rinci')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modeBiaya === 'Rinci' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modeBiaya === 'Rinci' ? 'white' : 'var(--accent-primary)' }}>Input Satu-Satu</button>
+          </div>
+
+          {modeBiaya === 'Global' ? (
+            <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+              <CurrencyInput label="Total Modal Sekali Tanam (Gabungan)" value={modalGlobal} onChange={setModalGlobal} />
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
+                *Gabungan biaya pupuk, obat, traktor, & buruh tanam (biaya panen sudah terpotong otomatis).
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+              <CurrencyInput label="Benih / Bibit" value={expenses.benih} onChange={(v) => updateExpense('benih', v)} />
+              <CurrencyInput label="Pupuk" value={expenses.pupuk} onChange={(v) => updateExpense('pupuk', v)} />
+              <CurrencyInput label="Obat / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
+              <CurrencyInput label="Sewa Traktor / Bajak (Auto)" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
+              <CurrencyInput label="Sewa Lahan (Hanya info - tdk potong laba)" value={expenses.sewaLahan} onChange={(v) => updateExpense('sewaLahan', v)} />
+              <CurrencyInput label="Upah Buruh Tanam (Panen sdh otomatis dipotong)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
+              <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
+            </div>
+          )}
+
+          <div className="subtotal" style={{ marginTop: '1rem', color: 'var(--danger)' }}>
+            <span>Total Modal/Biaya:</span>
+            <span>{formatCurrency(totalExpense)}</span>
+          </div>
+        </div>
+
         {/* KOLOM PENDAPATAN */}
         <div className="calculation-section">
           <div className="section-header">
@@ -301,43 +338,6 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
               <span>Total Bersih Panen:</span>
               <span>{formatCurrency(sisaBawon)}</span>
             </div>
-          </div>
-        </div>
-
-        {/* KOLOM PENGELUARAN */}
-        <div className="calculation-section">
-          <div className="section-header">
-            <span className="section-icon"><Wallet size={24} color="var(--danger)" /></span>
-            <h3 className="section-title">Modal / Pengeluaran (Per Panen)</h3>
-          </div>
-
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-            <button onClick={() => setModeBiaya('Global')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modeBiaya === 'Global' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modeBiaya === 'Global' ? 'white' : 'var(--accent-primary)' }}>Input Keseluruhan</button>
-            <button onClick={() => setModeBiaya('Rinci')} className="action-btn" style={{ flex: 1, padding: '0.5rem', fontSize: '0.85rem', background: modeBiaya === 'Rinci' ? 'var(--accent-primary)' : 'transparent', border: '1px solid var(--accent-primary)', color: modeBiaya === 'Rinci' ? 'white' : 'var(--accent-primary)' }}>Input Satu-Satu</button>
-          </div>
-
-          {modeBiaya === 'Global' ? (
-            <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-              <CurrencyInput label="Total Modal Sekali Tanam (Gabungan)" value={modalGlobal} onChange={setModalGlobal} />
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                *Gabungan biaya pupuk, obat, traktor, & buruh tanam (biaya panen sudah terpotong otomatis).
-              </p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-              <CurrencyInput label="Benih / Bibit" value={expenses.benih} onChange={(v) => updateExpense('benih', v)} />
-              <CurrencyInput label="Pupuk" value={expenses.pupuk} onChange={(v) => updateExpense('pupuk', v)} />
-              <CurrencyInput label="Obat / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
-              <CurrencyInput label="Sewa Traktor / Bajak (Auto)" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
-              <CurrencyInput label="Sewa Lahan (Hanya info - tdk potong laba)" value={expenses.sewaLahan} onChange={(v) => updateExpense('sewaLahan', v)} />
-              <CurrencyInput label="Upah Buruh Tanam (Panen sdh otomatis dipotong)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
-              <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
-            </div>
-          )}
-
-          <div className="subtotal" style={{ marginTop: '1rem', color: 'var(--danger)' }}>
-            <span>Total Modal/Biaya:</span>
-            <span>{formatCurrency(totalExpense)}</span>
           </div>
         </div>
       </div>
