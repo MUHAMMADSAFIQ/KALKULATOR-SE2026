@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Printer, RefreshCw, LogOut, Sun, Moon, Briefcase, Building2, ShoppingCart, FolderArchive, BarChart3, Search } from 'lucide-react';
+import { Printer, RefreshCw, LogOut, Sun, Moon, Briefcase, Building2, ShoppingCart, FolderArchive, BarChart3, Search, Users } from 'lucide-react';
 import LoginScreen from './components/LoginScreen';
 import SearchKbli from './components/SearchKbli';
 import UtpPadiCalculator from './components/UtpPadiCalculator';
@@ -10,18 +10,16 @@ import AirIsiUlangCalculator from './components/AirIsiUlangCalculator';
 import WarungCalculator from './components/WarungCalculator';
 import GenericBusinessCalculator from './components/GenericBusinessCalculator';
 import AssetCalculator from './components/AssetCalculator';
-import WeeklyExpenses from './components/WeeklyExpenses';
-import MonthlyExpenses from './components/MonthlyExpenses';
-import YearlyExpenses from './components/YearlyExpenses';
 import ArchiveTab from './components/ArchiveTab';
 import ChatAssistant from './components/ChatAssistant';
 import QuickCalculator from './components/QuickCalculator';
+import ProbingKeluarga from './components/ProbingKeluarga';
 import { formatCurrency } from './utils';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeKbli, setActiveKbli] = useState(null);
-  const [activeTab, setActiveTab] = useState('usaha'); // 'usaha', 'aset', 'konsumsi', 'arsip'
+  const [activeTab, setActiveTab] = useState('usaha'); // 'usaha', 'aset', 'keluarga', 'arsip'
   const [activeDraft, setActiveDraft] = useState(null);
 
   // Identitas Responden (Global)
@@ -38,13 +36,7 @@ function App() {
     }
   }, [theme]);
 
-  // Pengeluaran Rumah Tangga (Global)
-  const [totalWeekly, setTotalWeekly] = useState(0);
-  const [totalMonthly, setTotalMonthly] = useState(0);
-  const [totalYearlySpecific, setTotalYearlySpecific] = useState(0);
-
-  const totalYearlyFromMonthly = totalMonthly * 12;
-  const grandTotalYearly = totalYearlyFromMonthly + totalYearlySpecific;
+  // (Pengeluaran Rumah Tangga global dihapus, karena sudah ditangani di ProbingKeluarga)
 
   if (!isAuthenticated) {
     return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
@@ -148,41 +140,25 @@ function App() {
           </div>
         )}
 
-        {/* TAB 3: KONSUMSI RT */}
-        {activeTab === 'konsumsi' && (
-          <div className="tab-content fade-in-up" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
-            <WeeklyExpenses onTotalChange={setTotalWeekly} />
-            <MonthlyExpenses onTotalChange={setTotalMonthly} />
-            <YearlyExpenses onTotalChange={setTotalYearlySpecific} />
-            <div className="glass-card summary-card">
-              <div className="card-header" style={{ borderBottomColor: 'var(--accent-primary)' }}>
-                <h2 className="card-title" style={{ color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><BarChart3 size={20} /> Ringkasan Pengeluaran Konsumsi</h2>
-              </div>
-              <div className="summary-grid">
-                <div className="summary-item">
-                  <span className="label">Dari Bulanan (x12)</span>
-                  <span className="value">{formatCurrency(totalYearlyFromMonthly)}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="label">Khusus Tahunan</span>
-                  <span className="value">{formatCurrency(totalYearlySpecific)}</span>
-                </div>
-                <div className="summary-item total">
-                  <span className="label">Total Pengeluaran Setahun</span>
-                  <span className="value">{formatCurrency(grandTotalYearly)}</span>
-                </div>
-              </div>
-            </div>
+        {/* TAB 3: PROBING KELUARGA */}
+        {activeTab === 'keluarga' && (
+          <div className="tab-content fade-in-up">
+            <ProbingKeluarga initialData={activeDraft} onSaved={() => setActiveDraft(null)} />
           </div>
         )}
 
         {activeTab === 'arsip' && (
           <div className="fade-in">
             <ArchiveTab onContinueDraft={(draft) => {
-              setActiveKbli({ id: draft.kbliId, name: draft.namaUsaha, code: draft.kbliCode, category: '' });
-              if (draft.namaResponden) setNamaResponden(draft.namaResponden);
-              setActiveDraft(draft);
-              setActiveTab('usaha');
+              if (draft.kbliCode === 'RT-000') {
+                setActiveDraft(draft);
+                setActiveTab('keluarga');
+              } else {
+                setActiveKbli({ id: draft.kbliId, name: draft.namaUsaha, code: draft.kbliCode, category: '' });
+                if (draft.namaResponden) setNamaResponden(draft.namaResponden);
+                setActiveDraft(draft);
+                setActiveTab('usaha');
+              }
             }} />
           </div>
         )}
@@ -208,11 +184,11 @@ function App() {
           <span className="nav-label">Aset</span>
         </button>
         <button 
-          className={`nav-item ${activeTab === 'konsumsi' ? 'active' : ''}`}
-          onClick={() => setActiveTab('konsumsi')}
+          className={`nav-item ${activeTab === 'keluarga' ? 'active' : ''}`}
+          onClick={() => setActiveTab('keluarga')}
         >
-          <span className="nav-icon"><ShoppingCart size={24} strokeWidth={1.5} /></span>
-          <span className="nav-label">Konsumsi</span>
+          <span className="nav-icon"><Users size={24} strokeWidth={1.5} /></span>
+          <span className="nav-label">Keluarga</span>
         </button>
         <button 
           className={`nav-item ${activeTab === 'arsip' ? 'active' : ''}`}
