@@ -27,9 +27,16 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
     const ubin = e.target.value;
     setLuasUbin(ubin);
     if (ubin) {
-      setLuasMeter((parseFloat(ubin) * UBIN_TO_M2).toFixed(2));
+      const ubinVal = parseFloat(ubin);
+      setLuasMeter((ubinVal * UBIN_TO_M2).toFixed(2));
+      setExpenses(prev => ({
+        ...prev,
+        sewaTraktor: ubinVal * 3000,
+        sewaLahan: statusKepemilikan === 'Sendiri' ? ubinVal * 350000 : 0
+      }));
     } else {
       setLuasMeter('');
+      setExpenses(prev => ({...prev, sewaTraktor: 0, sewaLahan: 0}));
     }
   };
 
@@ -37,9 +44,27 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
     const m2 = e.target.value;
     setLuasMeter(m2);
     if (m2) {
-      setLuasUbin((parseFloat(m2) / UBIN_TO_M2).toFixed(2));
+      const ubinVal = parseFloat(m2) / UBIN_TO_M2;
+      setLuasUbin(ubinVal.toFixed(2));
+      setExpenses(prev => ({
+        ...prev,
+        sewaTraktor: ubinVal * 3000,
+        sewaLahan: statusKepemilikan === 'Sendiri' ? ubinVal * 350000 : 0
+      }));
     } else {
       setLuasUbin('');
+      setExpenses(prev => ({...prev, sewaTraktor: 0, sewaLahan: 0}));
+    }
+  };
+
+  const handleStatusChange = (mode) => {
+    setStatusKepemilikan(mode);
+    if (luasUbin) {
+      const ubinVal = parseFloat(luasUbin);
+      setExpenses(prev => ({
+        ...prev,
+        sewaLahan: mode === 'Sendiri' ? ubinVal * 350000 : 0
+      }));
     }
   };
   
@@ -51,6 +76,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
     pupuk: 0,
     pestisida: 0,
     sewaTraktor: 0,
+    sewaLahan: 0,
     upahBuruh: 0,
     irigasi: 0,
   });
@@ -161,7 +187,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
           {['Sendiri', 'Maro'].map((mode) => (
             <button 
               key={mode}
-              onClick={() => setStatusKepemilikan(mode)}
+              onClick={() => handleStatusChange(mode)}
               style={{ 
                 flex: 1, padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
                 background: statusKepemilikan === mode ? 'var(--accent-primary)' : 'var(--bg-secondary)',
@@ -217,7 +243,8 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
               <CurrencyInput label="Benih / Bibit" value={expenses.benih} onChange={(v) => updateExpense('benih', v)} />
               <CurrencyInput label="Pupuk" value={expenses.pupuk} onChange={(v) => updateExpense('pupuk', v)} />
               <CurrencyInput label="Obat / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
-              <CurrencyInput label="Sewa Traktor / Bajak" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
+              <CurrencyInput label="Sewa Traktor / Bajak (Auto)" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
+              <CurrencyInput label="Harga Tanah / Sewa Lahan (Auto)" value={expenses.sewaLahan} onChange={(v) => updateExpense('sewaLahan', v)} />
               <CurrencyInput label="Upah Buruh Tanam (Panen Otomatis 1/7)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
               <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
             </div>
@@ -319,7 +346,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
 
           
       <>
-        <BusinessConclusion namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'} totalIncome={panenGabah * frekuensiPanen} totalExpense={totalExpense * frekuensiPanen} netProfitTahunan={netProfitTahunan} expenseDetails={[{name: 'Benih', value: expenses?.benih || 0}, {name: 'Pupuk', value: expenses?.pupuk || 0}, {name: 'Pestisida', value: expenses?.pestisida || 0}, {name: 'Sewa Traktor', value: expenses?.sewaTraktor || 0}, {name: 'Upah Buruh', value: expenses?.upahBuruh || 0}, {name: 'Irigasi', value: expenses?.irigasi || 0}]} />
+        <BusinessConclusion namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'} totalIncome={panenGabah * frekuensiPanen} totalExpense={totalExpense * frekuensiPanen} netProfitTahunan={netProfitTahunan} expenseDetails={[{name: 'Benih', value: expenses?.benih || 0}, {name: 'Pupuk', value: expenses?.pupuk || 0}, {name: 'Pestisida', value: expenses?.pestisida || 0}, {name: 'Sewa Traktor', value: expenses?.sewaTraktor || 0}, {name: 'Sewa Lahan', value: expenses?.sewaLahan || 0}, {name: 'Upah Buruh', value: expenses?.upahBuruh || 0}, {name: 'Irigasi', value: expenses?.irigasi || 0}]} />
         <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
         {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
       </>
