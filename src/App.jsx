@@ -133,12 +133,7 @@ function App() {
           </div>
         )}
 
-        {/* TAB 2: ASET */}
-        {activeTab === 'aset' && (
-          <div className="tab-content fade-in-up">
-            <AssetCalculator />
-          </div>
-        )}
+
 
         {/* TAB 3: PROBING KELUARGA */}
         {activeTab === 'keluarga' && (
@@ -176,13 +171,7 @@ function App() {
           <span className="nav-icon"><Briefcase size={24} strokeWidth={1.5} /></span>
           <span className="nav-label">Usaha</span>
         </button>
-        <button 
-          className={`nav-item ${activeTab === 'aset' ? 'active' : ''}`}
-          onClick={() => setActiveTab('aset')}
-        >
-          <span className="nav-icon"><Building2 size={24} strokeWidth={1.5} /></span>
-          <span className="nav-label">Aset</span>
-        </button>
+
         <button 
           className={`nav-item ${activeTab === 'keluarga' ? 'active' : ''}`}
           onClick={() => setActiveTab('keluarga')}
