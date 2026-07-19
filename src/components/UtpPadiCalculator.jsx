@@ -344,56 +344,93 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
 
 
       <div className="summary-card" style={{ marginTop: 'var(--spacing-md)', borderRadius: 'var(--radius-md)', padding: 'var(--spacing-md)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <span style={{ display: 'block', fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
-            Estimasi Pendapatan Bersih Setahun {statusKepemilikan === 'Maro' ? `(Bagian Anda: ${persentaseMaro}%)` : ''}
-          </span>
-          <span style={{ 
-            fontFamily: 'Outfit', 
-            fontSize: '2.5rem', 
-            fontWeight: '700', 
-            color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)',
-            textShadow: netProfitTahunan >= 0 ? '0 0 15px rgba(16, 185, 129, 0.4)' : '0 0 15px rgba(239, 68, 68, 0.4)'
-          }}>
-            {formatCurrency(netProfitTahunan)}
-          </span>
-          <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1rem' }}>
-            <span>Laba per Musim Tanam: {formatCurrency(profitSetelahMaro)}</span>
-            <span style={{ color: 'var(--accent-secondary)', fontWeight: 'bold' }}>Rata-rata Bersih Per Bulan: {formatCurrency(netProfitTahunan / 12)}</span>
-          </div>
-          
-          <div style={{ marginTop: '1.5rem', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: 'var(--radius-sm)', borderLeft: '4px solid var(--accent-primary)', textAlign: 'left', fontStyle: 'italic', color: 'var(--text-primary)' }}>
-            <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--accent-primary)', fontStyle: 'normal' }}>💬 Kesimpulan (Narasi Wawancara):</strong>
-            "Berdasarkan data yang Bapak/Ibu berikan, lahan seluas 
-            <strong style={{ color: 'var(--accent-primary)' }}> {luasUbin ? `${luasUbin} ubin` : '...'} </strong> 
-            ini {statusKepemilikan === 'Maro' ? <span><strong>digarap secara bagi hasil ({persentaseMaro}%)</strong> dan </span> : ''} bisa dipanen <strong>{frekuensiPanen} kali setahun</strong>. 
-            Setelah dipotong semua biaya modal (traktor, buruh, pupuk, dll), perkiraan penghasilan bersih Bapak/Ibu adalah sekitar 
-            <strong style={{ color: netProfitTahunan >= 0 ? 'var(--success)' : 'var(--danger)' }}> {formatCurrency(netProfitTahunan / 12)} per bulannya</strong>. 
-            Apakah kira-kira angka ini sudah sesuai dengan kenyataan sehari-hari?"
-          </div>
+        {/* FASIH MAPPING */}
+        {(() => {
+          const baseUpah = modeBiaya === 'Global' ? 0 : parseFloat(expenses?.upahBuruh || 0);
+          const fasihUpahBuruh = (baseUpah + biayaBawon) * frekuensiPanen;
 
+          const baseProduksi = modeBiaya === 'Global' ? parseFloat(modalGlobal || 0) : (parseFloat(expenses?.benih || 0) + parseFloat(expenses?.pupuk || 0) + parseFloat(expenses?.pestisida || 0) + parseFloat(expenses?.sewaTraktor || 0));
+          const fasihBiayaProduksi = baseProduksi * frekuensiPanen;
           
-      <>
-        <BusinessConclusion 
-          namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} 
-          namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'} 
-          totalIncome={panenGabah * frekuensiPanen} 
-          totalExpense={totalExpense * frekuensiPanen} 
-          netProfitTahunan={netProfitTahunan} 
-          expenseDetails={[
-            { name: 'Biaya Tenaga Kerja (Buruh & Bawon)', value: ((expenses?.upahBuruh || 0) + biayaBawon) * frekuensiPanen },
-            { name: 'Biaya Material (Pupuk, Benih, Obat)', value: ((expenses?.benih || 0) + (expenses?.pupuk || 0) + (expenses?.pestisida || 0)) * frekuensiPanen },
-            { name: 'Biaya Operasional (Traktor, Irigasi)', value: ((expenses?.sewaTraktor || 0) + (expenses?.irigasi || 0)) * frekuensiPanen }
-          ]} 
-          nonOperationalDetails={[
-            { name: 'Sewa Lahan (Peluang/Aset)', value: (expenses?.sewaLahan || 0) * frekuensiPanen }
-          ]}
-        />
-        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
-        {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
-      </>
-    
-        </div>
+          const baseSewaLahan = parseFloat(expenses?.sewaLahan || 0);
+          const fasihSewaLahan = baseSewaLahan * frekuensiPanen;
+
+          const baseOperasional = modeBiaya === 'Global' ? 0 : parseFloat(expenses?.irigasi || 0);
+          const fasihBiayaOperasional = baseOperasional * frekuensiPanen;
+
+          const fasihBiayaNonOperasional = 0;
+          const fasihTotalPengeluaran = fasihUpahBuruh + fasihBiayaProduksi + fasihSewaLahan + fasihBiayaOperasional + fasihBiayaNonOperasional;
+
+          const fasihTotalPendapatan = panenGabah * frekuensiPanen;
+          const fasihPendapatanLainnya = 0;
+          const fasihTotalProduksi = fasihTotalPendapatan + fasihPendapatanLainnya;
+
+          const fasihLabaBersih = fasihTotalProduksi - fasihTotalPengeluaran;
+
+          return (
+            <div>
+              <h3 style={{ color: '#f97316', marginBottom: '1rem', textAlign: 'center', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                <Sprout size={20} /> Siap Salin ke Aplikasi FASIH (Total Setahun)
+              </h3>
+
+              <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.5rem', borderLeft: '4px solid #f97316', lineHeight: '1.8' }}>
+                <div style={{ fontWeight: 'bold', color: 'var(--accent-primary)', marginBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>BLOK 26: PENGELUARAN TAHUNAN</div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.95rem' }}>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>26.a. Upah/Gaji & Sosial (Buruh Tanam + Bawon)</span> <strong>{formatCurrency(fasihUpahBuruh)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>26.b. Biaya Produksi (Benih, Pupuk, Obat, Traktor)</span> <strong>{formatCurrency(fasihBiayaProduksi)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>26.c. Biaya Jasa/Lainnya (Sewa Lahan)</span> <strong>{formatCurrency(fasihSewaLahan)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>26.d. Biaya Operasional (Irigasi/Air/Bensin)</span> <strong>{formatCurrency(fasihBiayaOperasional)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>26.e. Biaya Non-Operasional</span> <strong>{formatCurrency(fasihBiayaNonOperasional)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '1rem', marginTop: '0.5rem', color: 'var(--danger)', fontWeight: 'bold' }}>
+                    <span>26.f. TOTAL PENGELUARAN (a+b+c+d+e)</span> <strong>{formatCurrency(fasihTotalPengeluaran)}</strong>
+                  </li>
+                </ul>
+
+                <div style={{ fontWeight: 'bold', color: 'var(--accent-primary)', marginBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem', marginTop: '1.5rem' }}>BLOK 27: PENDAPATAN TAHUNAN</div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.95rem' }}>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>27.a. Nilai Produksi (Panen Kotor)</span> <strong>{formatCurrency(fasihTotalPendapatan)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>27.b. Pendapatan Lainnya</span> <strong>{formatCurrency(fasihPendapatanLainnya)}</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '1rem', marginTop: '0.5rem', color: 'var(--success)', fontWeight: 'bold' }}>
+                    <span>27.c. TOTAL PENDAPATAN (a+b)</span> <strong>{formatCurrency(fasihTotalProduksi)}</strong>
+                  </li>
+                </ul>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem', background: 'rgba(0,0,0,0.1)', borderRadius: '4px', border: '1px solid var(--glass-border)', marginBottom: '1.5rem', color: fasihLabaBersih >= 0 ? 'var(--success)' : 'var(--danger)', fontWeight: 'bold' }}>
+                  <span>LABA BERSIH SETAHUN (27.c - 26.f)</span>
+                  <span>{formatCurrency(fasihLabaBersih)}</span>
+                </div>
+
+                <div style={{ fontWeight: 'bold', color: 'var(--accent-primary)', marginBottom: '0.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>BLOK 28 & 29: ASET DAN KEPEMILIKAN</div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: '0.95rem' }}>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>28.a & 28.b. Nilai Aset</span> <strong>Rp 0 (Lewati)</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--glass-border)', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>28.d. Luas Tanah (m2)</span> <strong>{luasMeter ? parseFloat(luasMeter).toLocaleString('id-ID') : 0} m2</strong>
+                  </li>
+                  <li style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.3rem', marginBottom: '0.3rem' }}>
+                    <span>29.a. Kepemilikan Pribadi</span> <strong>100%</strong>
+                  </li>
+                </ul>
+              </div>
+              <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
