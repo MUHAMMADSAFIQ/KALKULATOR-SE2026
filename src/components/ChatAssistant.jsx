@@ -7,13 +7,13 @@ export default function ChatAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyModal, setShowApiKeyModal] = useState(false);
-  
+
   const [messages, setMessages] = useState([
     { role: 'assistant', content: 'Halo! Saya Asisten AI Sensus BPS. Ada yang bisa saya bantu terkait KBLI, kelogisan data, atau konsep survei?' }
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const messagesEndRef = useRef(null);
   const hfRef = useRef(null);
 
@@ -69,7 +69,7 @@ export default function ChatAssistant() {
 
     const userText = inputMessage.trim();
     setInputMessage('');
-    
+
     const newMessages = [...messages, { role: 'user', content: userText }];
     setMessages(newMessages);
     setIsLoading(true);
@@ -113,7 +113,7 @@ export default function ChatAssistant() {
 
     } catch (error) {
       let errorMsg = error.message || 'Terjadi kesalahan.';
-      
+
       if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
         errorMsg = '🔑 Token tidak valid. Klik ⚙️ untuk memasukkan ulang.';
       } else if (errorMsg.includes('503') || errorMsg.includes('loading')) {
@@ -123,7 +123,7 @@ export default function ChatAssistant() {
       } else {
         errorMsg = `❌ ${errorMsg}`;
       }
-      
+
       setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ ${errorMsg}` }]);
     } finally {
       setIsLoading(false);
@@ -168,7 +168,7 @@ export default function ChatAssistant() {
               ⚙️
             </button>
           </div>
-          
+
           <div className="chat-body">
             {messages.map((msg, idx) => (
               <div key={idx} className={`chat-bubble-wrapper ${msg.role === 'user' ? 'user' : 'assistant'}`}>
@@ -186,7 +186,7 @@ export default function ChatAssistant() {
           </div>
 
           <form className="chat-footer" onSubmit={sendMessage}>
-            <input 
+            <input
               type="text" className="chat-input" value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Tanya KBLI, kelogisan data..."

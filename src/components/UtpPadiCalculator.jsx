@@ -104,7 +104,12 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
   // 3. Kurangi Modal Operasional (selain biaya panen)
   const totalExpense = modeBiaya === 'Global' 
     ? parseFloat(modalGlobal || 0) 
-    : Object.values(expenses).reduce((a, b) => a + b, 0);
+    : (parseFloat(expenses?.benih || 0) +
+       parseFloat(expenses?.pupuk || 0) +
+       parseFloat(expenses?.pestisida || 0) +
+       parseFloat(expenses?.sewaTraktor || 0) +
+       parseFloat(expenses?.upahBuruh || 0) +
+       parseFloat(expenses?.irigasi || 0));
 
   const profitSetelahMaro = pendapatanKotorPenggarap - totalExpense;
 
