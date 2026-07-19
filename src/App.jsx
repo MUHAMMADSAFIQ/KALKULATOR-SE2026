@@ -4,7 +4,7 @@ import LoginScreen from './components/LoginScreen';
 import SearchKbli from './components/SearchKbli';
 import UtpPadiCalculator from './components/UtpPadiCalculator';
 import IndustriTempeCalculator from './components/IndustriTempeCalculator';
-import TernakKambingCalculator from './components/TernakKambingCalculator';
+import PeternakanCalculator from './components/PeternakanCalculator';
 import TokoBangunanCalculator from './components/TokoBangunanCalculator';
 import AirIsiUlangCalculator from './components/AirIsiUlangCalculator';
 import WarungCalculator from './components/WarungCalculator';
@@ -114,14 +114,14 @@ function App() {
 
             {activeKbli?.id === 'utp_padi' && <UtpPadiCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             {activeKbli?.id === 'industri_tempe' && <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
-            {activeKbli?.id === 'ternak_kambing' && <TernakKambingCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
+            {(activeKbli?.id === 'ternak_kambing' || activeKbli?.name?.toLowerCase().includes('ternak') || activeKbli?.name?.toLowerCase().includes('peternakan')) && <PeternakanCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             {activeKbli?.id === 'toko_bangunan' && <TokoBangunanCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             {activeKbli?.id === 'air_isi_ulang' && <AirIsiUlangCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             {activeKbli?.id === 'warung' && <WarungCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             {activeKbli?.id === 'kilat' && <QuickCalculator activeKbli={activeKbli} namaResponden={namaResponden} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />}
             
             {/* Fallback untuk KBLI lainnya */}
-            {(!['utp_padi', 'industri_tempe', 'ternak_kambing', 'toko_bangunan', 'air_isi_ulang', 'warung', 'kilat'].includes(activeKbli?.id)) && (
+            {(!['utp_padi', 'industri_tempe', 'toko_bangunan', 'air_isi_ulang', 'warung', 'kilat'].includes(activeKbli?.id) && !(activeKbli?.id === 'ternak_kambing' || activeKbli?.name?.toLowerCase().includes('ternak') || activeKbli?.name?.toLowerCase().includes('peternakan'))) && (
               <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={namaResponden} title={activeKbli?.name || "Kalkulator Usaha Umum"} initialData={activeDraft} onSaved={() => setActiveDraft(null)} />
             )}
 
