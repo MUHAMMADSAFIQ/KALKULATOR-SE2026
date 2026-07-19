@@ -8,6 +8,7 @@ export default function BusinessConclusion({
   totalExpense, 
   netProfitTahunan,
   expenseDetails = [],
+  nonOperationalDetails = [],
   tahunBerdiri = '<=2025',
   bulanBerdiri = 1
 }) {
@@ -17,6 +18,7 @@ export default function BusinessConclusion({
 
   // Filter only valid positive expenses
   const validExpenses = expenseDetails.filter(e => e && e.value > 0);
+  const validNonOps = nonOperationalDetails.filter(e => e && e.value > 0);
 
   return (
     <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '2px solid var(--glass-border)' }}>
@@ -39,7 +41,7 @@ export default function BusinessConclusion({
           </p>
           
           <div style={{ marginBottom: '1rem', paddingLeft: '1rem' }}>
-            <strong style={{ display: 'block', marginBottom: '0.3rem' }}>Rincian Pengeluaran/Biaya Operasional:</strong>
+            <strong style={{ display: 'block', marginBottom: '0.3rem' }}>Rincian Biaya Operasional / Pengeluaran Tunai:</strong>
             <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', color: 'var(--text-secondary)' }}>
               {validExpenses.length > 0 ? (
                 validExpenses.map((e, idx) => (
@@ -52,6 +54,22 @@ export default function BusinessConclusion({
               )}
             </ul>
           </div>
+
+          {validNonOps.length > 0 && (
+            <div style={{ marginBottom: '1rem', paddingLeft: '1rem' }}>
+              <strong style={{ display: 'block', marginBottom: '0.3rem' }}>Biaya Non-Operasional / Nilai Aset Pribadi:</strong>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '0.3rem', fontStyle: 'italic' }}>
+                (Informasi tambahan: tidak dikurangkan dari laba bersih karena merupakan aset yang sudah dimiliki)
+              </p>
+              <ul style={{ listStyleType: 'disc', paddingLeft: '1.5rem', color: 'var(--text-secondary)' }}>
+                {validNonOps.map((e, idx) => (
+                  <li key={idx} style={{ marginBottom: '0.2rem' }}>
+                    {e.name}: <strong>{formatCurrency(e.value)}</strong>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.8rem', borderRadius: '4px', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>

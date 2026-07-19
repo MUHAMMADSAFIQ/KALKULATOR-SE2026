@@ -87,13 +87,16 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
   const [hargaKuintal, setHargaKuintal] = useState(initialData?.rawState?.hargaKuintal ?? 650000);
   const [pendapatanUang, setPendapatanUang] = useState(initialData?.rawState?.pendapatanUang ?? 0);
   
+  // Opsi Bawon (Biaya Panen)
+  const [bawonFraction, setBawonFraction] = useState(initialData?.rawState?.bawonFraction ?? (1/7));
+
   // Kalkulasi
   const panenGabah = modePendapatan === 'Kuintal' 
     ? parseFloat(jumlahKuintal || 0) * parseFloat(hargaKuintal || 0)
     : parseFloat(pendapatanUang || 0);
 
-  // 1. Potongan Bawon (Biaya Panen 1/7 otomatis)
-  const biayaBawon = panenGabah * (1 / 7);
+  // 1. Potongan Bawon (Biaya Panen otomatis)
+  const biayaBawon = panenGabah * bawonFraction;
   const sisaBawon = panenGabah - biayaBawon;
 
   // 2. Bagi Hasil Lahan
@@ -118,7 +121,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
   const updateExpense = (key, value) => setExpenses(prev => ({ ...prev, [key]: value }));
 
   
-  const getRawState = () => ({ luasUbin, luasMeter, frekuensiPanen, statusKepemilikan, persentaseMaro, modeBiaya, modalGlobal, expenses, modePendapatan, jumlahKuintal, hargaKuintal, pendapatanUang });
+  const getRawState = () => ({ luasUbin, luasMeter, frekuensiPanen, statusKepemilikan, persentaseMaro, modeBiaya, modalGlobal, expenses, modePendapatan, jumlahKuintal, hargaKuintal, pendapatanUang, bawonFraction });
 
   const buildRecord = (status, catatan = '', namaDraft = '') => {
     const defaultTotalIncome = typeof totalIncome !== 'undefined' ? totalIncome : (typeof netProfitTahunan !== 'undefined' ? netProfitTahunan : (typeof panenGabah !== 'undefined' ? panenGabah * frekuensiPanen : (typeof income !== 'undefined' ? income : 0)));
@@ -269,17 +272,33 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
             <CurrencyInput label="Total Uang Pendapatan Sekali Panen" value={pendapatanUang} onChange={setPendapatanUang} />
           )}
           
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>Biaya Panen (Bawon):</label>
+            <select 
+              value={bawonFraction} 
+              onChange={(e) => setBawonFraction(parseFloat(e.target.value))}
+              className="input-field"
+              style={{ padding: '0.5rem', background: 'var(--bg-secondary)', borderColor: 'var(--accent-primary)', color: 'var(--text-primary)' }}
+            >
+              <option value={1/6}>1/6 (Sekitar 16.6%)</option>
+              <option value={1/7}>1/7 (Sekitar 14.3%)</option>
+              <option value={1/8}>1/8 (Sekitar 12.5%)</option>
+              <option value={1/10}>1/10 (10%)</option>
+              <option value={0}>Tidak ada (0%)</option>
+            </select>
+          </div>
+
           <div className="subtotal" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'stretch' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
               <span>Panen Kotor:</span>
               <span>{formatCurrency(panenGabah)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: 'var(--danger)' }}>
-              <span>Biaya Panen / Bawon (1/7):</span>
+              <span>Biaya Panen / Bawon:</span>
               <span>- {formatCurrency(biayaBawon)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', borderTop: '1px solid var(--glass-border)', paddingTop: '0.5rem', marginTop: '0.2rem' }}>
-              <span>Total Bersih Panen (6/7):</span>
+              <span>Total Bersih Panen:</span>
               <span>{formatCurrency(sisaBawon)}</span>
             </div>
           </div>
@@ -301,7 +320,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
             <div style={{ padding: '1rem', background: 'rgba(239, 68, 68, 0.05)', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
               <CurrencyInput label="Total Modal Sekali Tanam (Gabungan)" value={modalGlobal} onChange={setModalGlobal} />
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.5rem' }}>
-                *Gabungan biaya pupuk, obat, traktor, & buruh tanam (biaya panen sudah terpotong otomatis 1/7).
+                *Gabungan biaya pupuk, obat, traktor, & buruh tanam (biaya panen sudah terpotong otomatis).
               </p>
             </div>
           ) : (
@@ -311,7 +330,7 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
               <CurrencyInput label="Obat / Pestisida" value={expenses.pestisida} onChange={(v) => updateExpense('pestisida', v)} />
               <CurrencyInput label="Sewa Traktor / Bajak (Auto)" value={expenses.sewaTraktor} onChange={(v) => updateExpense('sewaTraktor', v)} />
               <CurrencyInput label="Sewa Lahan (Hanya info - tdk potong laba)" value={expenses.sewaLahan} onChange={(v) => updateExpense('sewaLahan', v)} />
-              <CurrencyInput label="Upah Buruh Tanam (Panen sdh otomatis 1/7)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
+              <CurrencyInput label="Upah Buruh Tanam (Panen sdh otomatis dipotong)" value={expenses.upahBuruh} onChange={(v) => updateExpense('upahBuruh', v)} />
               <CurrencyInput label="Biaya Irigasi / Air" value={expenses.irigasi} onChange={(v) => updateExpense('irigasi', v)} />
             </div>
           )}
@@ -355,7 +374,21 @@ export default function UtpPadiCalculator({ activeKbli, namaResponden , initialD
 
           
       <>
-        <BusinessConclusion namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'} totalIncome={panenGabah * frekuensiPanen} totalExpense={totalExpense * frekuensiPanen} netProfitTahunan={netProfitTahunan} expenseDetails={[{name: 'Benih', value: expenses?.benih || 0}, {name: 'Pupuk', value: expenses?.pupuk || 0}, {name: 'Pestisida', value: expenses?.pestisida || 0}, {name: 'Sewa Traktor', value: expenses?.sewaTraktor || 0}, {name: 'Sewa Lahan', value: expenses?.sewaLahan || 0}, {name: 'Upah Buruh', value: expenses?.upahBuruh || 0}, {name: 'Irigasi', value: expenses?.irigasi || 0}]} />
+        <BusinessConclusion 
+          namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} 
+          namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'} 
+          totalIncome={panenGabah * frekuensiPanen} 
+          totalExpense={totalExpense * frekuensiPanen} 
+          netProfitTahunan={netProfitTahunan} 
+          expenseDetails={[
+            { name: 'Biaya Tenaga Kerja (Buruh & Bawon)', value: ((expenses?.upahBuruh || 0) + biayaBawon) * frekuensiPanen },
+            { name: 'Biaya Material (Pupuk, Benih, Obat)', value: ((expenses?.benih || 0) + (expenses?.pupuk || 0) + (expenses?.pestisida || 0)) * frekuensiPanen },
+            { name: 'Biaya Operasional (Traktor, Irigasi)', value: ((expenses?.sewaTraktor || 0) + (expenses?.irigasi || 0)) * frekuensiPanen }
+          ]} 
+          nonOperationalDetails={[
+            { name: 'Sewa Lahan (Peluang/Aset)', value: (expenses?.sewaLahan || 0) * frekuensiPanen }
+          ]}
+        />
         <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
         {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
       </>

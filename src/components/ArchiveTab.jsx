@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FolderArchive, Download, Trash2, DatabaseBackup, Play, FileText, CheckCircle } from 'lucide-react';
-import { getArchiveData, exportToCSV, clearArchive, formatCurrency } from '../utils';
+import { getArchiveData, exportToXLSX, clearArchive, formatCurrency } from '../utils';
 
 export default function ArchiveTab({ onContinueDraft }) {
   const [records, setRecords] = useState([]);
@@ -11,7 +11,7 @@ export default function ArchiveTab({ onContinueDraft }) {
   }, []);
 
   const handleExport = () => {
-    exportToCSV(records.filter(r => r.status !== 'draft'));
+    exportToXLSX(records.filter(r => r.status !== 'draft'));
   };
 
   const handleClear = () => {
@@ -39,7 +39,7 @@ export default function ArchiveTab({ onContinueDraft }) {
             onClick={handleExport}
             disabled={finalRecords.length === 0}
           >
-            <Download size={16} /> Unduh Excel (CSV Final)
+            <Download size={16} /> Unduh Excel (XLSX Final)
           </button>
           <button 
             className="action-btn"
