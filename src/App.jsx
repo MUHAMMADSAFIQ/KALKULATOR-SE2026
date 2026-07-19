@@ -28,6 +28,7 @@ function App() {
   
   // Keranjang Usaha
   const [addedBusinesses, setAddedBusinesses] = useState([]);
+  const [openBusinessIndex, setOpenBusinessIndex] = useState(null); // Accordion state
 
   // Tema
   const [theme, setTheme] = useState('dark');
@@ -49,7 +50,23 @@ function App() {
     // Usually they just need one form per KBLI.
     if (!addedBusinesses.find(b => b.id === kbli.id)) {
       setAddedBusinesses([...addedBusinesses, kbli]);
+      setOpenBusinessIndex(addedBusinesses.length); // Auto open the newly added one
     }
+  };
+
+  const handleQuickAdd = (type) => {
+    let kbli = {};
+    if (type === 'pertanian') kbli = { id: 'utp_padi', name: 'Pertanian / Tanaman', code: '011' };
+    else if (type === 'peternakan') kbli = { id: 'ternak_kambing', name: 'Peternakan', code: '014' };
+    else if (type === 'warung') kbli = { id: 'warung', name: 'Warung / Kelontong', code: '471' };
+    else if (type === 'industri_tempe') kbli = { id: 'industri_tempe', name: 'Industri Tempe/Tahu', code: '103' };
+    else if (type === 'umum') kbli = { id: 'umum', name: 'Usaha Lainnya (Umum)', code: '000' };
+    
+    handleAddBusiness(kbli);
+  };
+
+  const toggleAccordion = (index) => {
+    setOpenBusinessIndex(openBusinessIndex === index ? null : index);
   };
 
   const handleRemoveBusiness = (index) => {
@@ -142,23 +159,20 @@ function App() {
               <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#3b82f6', marginBottom: '1rem' }}>
                 <Briefcase size={24} /> Usaha yang Dimiliki Keluarga
               </h2>
-              <SearchKbli onSelectUsaha={handleAddBusiness} />
               
-              {addedBusinesses.length > 0 && (
-                <div style={{ marginTop: '1.5rem' }}>
-                  <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Daftar Usaha Terpilih (Otomatis ditambahkan di bawah):</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {addedBusinesses.map((kbli, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.8rem 1rem', borderRadius: '4px', borderLeft: '4px solid var(--accent-primary)' }}>
-                        <div>
-                          <strong style={{ color: 'var(--text-primary)' }}>{kbli.name}</strong>
-                          <span style={{ marginLeft: '0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>KBLI: {kbli.code}</span>
-                        </div>
-                        <button onClick={() => handleRemoveBusiness(idx)} style={{ background: 'transparent', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.2rem 0.5rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>Hapus</button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button onClick={() => handleQuickAdd('pertanian')} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>+ Pertanian</button>
+                <button onClick={() => handleQuickAdd('peternakan')} style={{ background: 'var(--success)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>+ Peternakan</button>
+                <button onClick={() => handleQuickAdd('warung')} style={{ background: '#f59e0b', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>+ Warung</button>
+                <button onClick={() => handleQuickAdd('industri_tempe')} style={{ background: '#8b5cf6', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>+ Industri Tempe</button>
+                <button onClick={() => handleQuickAdd('umum')} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--glass-border)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>+ Usaha Lain (Umum)</button>
+              </div>
+
+              {/* Hapus SearchKbli lama jika tidak perlu, atau simpan di bawah button cepat */}
+              {/* <SearchKbli onSelectUsaha={handleAddBusiness} /> */}
+              
+              {addedBusinesses.length === 0 && (
+                <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic', marginTop: '1rem' }}>Belum ada usaha yang ditambahkan. Klik tombol di atas.</p>
               )}
             </div>
 
@@ -174,21 +188,35 @@ function App() {
               const isTokoBangunan = kbliId === 'toko_bangunan' || kbliName.includes('bahan bangunan');
               const isAirIsiUlang = kbliId === 'air_isi_ulang' || kbliName.includes('air minum') || kbliName.includes('isi ulang');
               const isWarung = kbliId === 'warung' || kbliName.includes('warung') || kbliName.includes('kelontong');
-              const isKilat = kbliId === 'kilat';
+              const isOpen = openBusinessIndex === index;
 
               return (
-                <div key={`${kbliId}-${index}`} style={{ animation: 'fadeIn 0.5s ease', marginTop: '1rem' }}>
-                  <div style={{ background: 'var(--accent-primary)', color: 'white', padding: '0.5rem 1rem', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontWeight: 'bold' }}>
-                    Usaha #{index + 1}: {activeKbli.name}
+                <div key={`${kbliId}-${index}`} style={{ animation: 'fadeIn 0.5s ease', marginTop: '0.5rem' }}>
+                  <div 
+                    onClick={() => toggleAccordion(index)}
+                    style={{ background: isOpen ? 'var(--accent-primary)' : 'var(--bg-secondary)', color: isOpen ? 'white' : 'var(--text-primary)', padding: '1rem', borderRadius: '8px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', border: isOpen ? 'none' : '1px solid var(--glass-border)' }}
+                  >
+                    <span>Usaha #{index + 1}: {activeKbli.name}</span>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 'normal', background: 'rgba(0,0,0,0.2)', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>
+                        {isOpen ? 'Sembunyikan Rincian ▲' : 'Isi Form / Buka Rincian ▼'}
+                      </span>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleRemoveBusiness(index); }} 
+                        style={{ background: 'var(--danger)', color: 'white', border: 'none', padding: '0.2rem 0.5rem', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}
+                      >
+                        Hapus Usaha
+                      </button>
+                    </div>
                   </div>
-                  {isPertanian ? <PertanianCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   isPeternakan ? <PeternakanCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   isIndustriTempe ? <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   isTokoBangunan ? <TokoBangunanCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   isAirIsiUlang ? <AirIsiUlangCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   isWarung ? <WarungCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   isKilat ? <QuickCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                   <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={fullNama} title={activeKbli.name} />}
+                  
+                  <div style={{ display: isOpen ? 'block' : 'none', marginTop: '-0.5rem', paddingTop: '0.5rem' }}>
+                    {isPertanian ? <PertanianCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                     isPeternakan ? <PeternakanCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                     isIndustriTempe ? <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                     isWarung ? <WarungCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
+                     <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={fullNama} title={activeKbli.name} />}
+                  </div>
                 </div>
               );
             })}
