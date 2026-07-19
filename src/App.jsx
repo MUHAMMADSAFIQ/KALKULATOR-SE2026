@@ -13,6 +13,7 @@ import ArchiveTab from './components/ArchiveTab';
 import ChatAssistant from './components/ChatAssistant';
 import QuickCalculator from './components/QuickCalculator';
 import ProbingKeluarga from './components/ProbingKeluarga';
+import { ShoppingBag } from 'lucide-react';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,9 +31,15 @@ function App() {
   const [noBangunan, setNoBangunan] = useState('');
   const [namaResponden, setNamaResponden] = useState('');
   
-  // Keranjang Usaha
+  // Keranjang Usaha (Untuk Sensus Terpadu)
   const [addedBusinesses, setAddedBusinesses] = useState([]);
   const [openBusinessIndex, setOpenBusinessIndex] = useState(null); // Accordion state
+
+  // State untuk Usaha Lepas
+  const [lepasKbli, setLepasKbli] = useState(null);
+  const [lepasNamaPemilik, setLepasNamaPemilik] = useState('');
+  const [lepasSaveTrigger, setLepasSaveTrigger] = useState(0);
+  const lepasCollectedDataRef = React.useRef([]);
 
   // Tema
   const [theme, setTheme] = useState('dark');
@@ -100,16 +107,74 @@ function App() {
         return;
       }
       
-      // We will save them individually but they share the same namaResponden
       import('./utils').then(({ saveToArchive }) => {
         records.forEach(r => saveToArchive(r));
         alert("BERHASIL! Seluruh data keluarga dan usaha berhasil diarsipkan.");
+        setActiveTab('arsip');
       });
     }, 500);
   };
 
   const handleCollectData = (data) => {
     if (data) collectedDataRef.current.push(data);
+  };
+
+  // Handler for Usaha Lepas
+  const handleLepasQuickAdd = (type) => {
+    let kbli = {};
+    if (type === 'pertanian') kbli = { id: 'utp_padi', name: 'Pertanian / Tanaman', code: '011' };
+    else if (type === 'peternakan') kbli = { id: 'ternak_kambing', name: 'Peternakan', code: '014' };
+    else if (type === 'warung') kbli = { id: 'warung', name: 'Warung / Kelontong', code: '471' };
+    else if (type === 'industri_tempe') kbli = { id: 'industri_tempe', name: 'Industri Tempe/Tahu', code: '103' };
+    else if (type === 'umum') kbli = { id: 'umum', name: 'Usaha Lainnya (Umum)', code: '000' };
+    
+    setLepasKbli(kbli);
+  };
+
+  const handleLepasSave = () => {
+    lepasCollectedDataRef.current = [];
+    setLepasSaveTrigger(prev => prev + 1);
+    
+    setTimeout(() => {
+      const records = lepasCollectedDataRef.current;
+      if (records.length === 0) return;
+      
+      import('./utils').then(({ saveToArchive }) => {
+        records.forEach(r => saveToArchive(r));
+        alert("BERHASIL! Data Usaha Lepas berhasil diarsipkan.");
+        setActiveTab('arsip');
+      });
+    }, 500);
+  };
+
+  const handleLepasCollect = (data) => {
+    if (data) lepasCollectedDataRef.current.push(data);
+  };
+
+  const renderCalculator = (kbli, isLepas = false) => {
+    const kbliId = kbli.id;
+    const kbliName = kbli.name.toLowerCase();
+    const fullNama = isLepas ? `${lepasNamaPemilik} (Usaha Lepas)` : getFullNamaResponden();
+    
+    const trigger = isLepas ? lepasSaveTrigger : saveTrigger;
+    const collector = isLepas ? handleLepasCollect : handleCollectData;
+    
+    const isPertanian = kbliId === 'utp_padi' || kbliName.includes('tanaman') || kbliName.includes('hortikultura') || kbliName.includes('perkebunan') || kbliName.includes('kehutanan') || kbliName.includes('pertanian') || kbliName.includes('padi') || kbliName.includes('palawija') || kbliName.includes('sayur');
+    const isPeternakan = kbliId === 'ternak_kambing' || kbliName.includes('ternak') || kbliName.includes('peternakan');
+    const isIndustriTempe = kbliId === 'industri_tempe' || kbliName.includes('tempe') || kbliName.includes('tahu');
+    const isTokoBangunan = kbliId === 'toko_bangunan' || kbliName.includes('bahan bangunan');
+    const isAirIsiUlang = kbliId === 'air_isi_ulang' || kbliName.includes('air minum') || kbliName.includes('isi ulang');
+    const isWarung = kbliId === 'warung' || kbliName.includes('warung') || kbliName.includes('kelontong');
+    const isKilat = kbliId === 'kilat';
+
+    if (isPertanian) return <PertanianCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    if (isPeternakan) return <PeternakanCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    if (isIndustriTempe) return <IndustriTempeCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    if (isTokoBangunan) return <TokoBangunanCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    if (isAirIsiUlang) return <AirIsiUlangCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    if (isWarung) return <WarungCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    if (isKilat) return <QuickCalculator activeKbli={kbli} namaResponden={fullNama} saveTrigger={trigger} onCollectData={collector} />;
+    return <GenericBusinessCalculator activeKbli={kbli} namaResponden={fullNama} title={kbli.name} saveTrigger={trigger} onCollectData={collector} />;
   };
 
   return (
@@ -246,11 +311,7 @@ function App() {
                   
                   <div className="print-force-show" style={{ display: isOpen ? 'block' : 'none', marginTop: '-0.5rem', paddingTop: '0.5rem' }}>
                     <div className="print-only" style={{ display: 'none', fontWeight: 'bold', color: 'black', margin: '1rem 0' }}>Usaha: {activeKbli.name}</div>
-                    {isPertanian ? <PertanianCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
-                     isPeternakan ? <PeternakanCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
-                     isIndustriTempe ? <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
-                     isWarung ? <WarungCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
-                     <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={fullNama} title={activeKbli.name} saveTrigger={saveTrigger} onCollectData={handleCollectData} />}
+                    {renderCalculator(activeKbli, false)}
                   </div>
                 </div>
               );
@@ -278,6 +339,74 @@ function App() {
           </div>
         )}
 
+        {/* TAB USAHA LEPAS */}
+        {activeTab === 'lepas' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)', gridColumn: '1 / -1' }}>
+            <div className="glass-card" style={{ background: 'rgba(16, 185, 129, 0.05)', borderColor: 'var(--success)' }}>
+              <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--success)', marginBottom: '0.5rem' }}>
+                <ShoppingBag size={24} /> Kalkulator Usaha Lepas
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                Gunakan menu ini jika Anda HANYA ingin menghitung 1 usaha secara cepat tanpa mendata identitas wilayah dan keluarganya.
+              </p>
+              
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>👤 Nama Pemilik Usaha (Opsional)</label>
+                <input 
+                  type="text" 
+                  className="input-field" 
+                  value={lepasNamaPemilik} 
+                  onChange={e => setLepasNamaPemilik(e.target.value)} 
+                  placeholder="Ketik nama pemilik..." 
+                />
+              </div>
+
+              {!lepasKbli && (
+                <div>
+                  <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Pilih Kategori Usaha Secara Cepat:</h4>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    <button onClick={() => handleLepasQuickAdd('pertanian')} style={{ background: 'var(--accent-primary)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>Pertanian</button>
+                    <button onClick={() => handleLepasQuickAdd('peternakan')} style={{ background: 'var(--success)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>Peternakan</button>
+                    <button onClick={() => handleLepasQuickAdd('warung')} style={{ background: '#f59e0b', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>Warung</button>
+                    <button onClick={() => handleLepasQuickAdd('industri_tempe')} style={{ background: '#8b5cf6', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>Industri Tempe</button>
+                    <button onClick={() => handleLepasQuickAdd('umum')} style={{ background: 'var(--bg-secondary)', color: 'var(--text-primary)', border: '1px solid var(--glass-border)', padding: '0.5rem 1rem', borderRadius: '4px', cursor: 'pointer' }}>Usaha Lain (Umum)</button>
+                  </div>
+                  
+                  <h4 style={{ color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Atau Cari Berdasarkan KBLI:</h4>
+                  <SearchKbli onSelectUsaha={setLepasKbli} />
+                </div>
+              )}
+
+              {lepasKbli && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', padding: '1rem', borderRadius: '8px', borderLeft: '4px solid var(--success)' }}>
+                  <div>
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'block' }}>Usaha Terpilih:</span>
+                    <strong style={{ fontSize: '1.1rem', color: 'var(--success)' }}>{lepasKbli.name}</strong>
+                  </div>
+                  <button onClick={() => setLepasKbli(null)} style={{ background: 'transparent', border: '1px solid var(--danger)', color: 'var(--danger)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
+                    Batal / Ganti
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {lepasKbli && (
+              <div style={{ animation: 'fadeIn 0.5s ease' }}>
+                {renderCalculator(lepasKbli, true)}
+
+                <div className="no-print" style={{ marginTop: '2rem', textAlign: 'center' }}>
+                  <button 
+                    onClick={handleLepasSave}
+                    style={{ background: 'var(--success)', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', display: 'inline-flex', alignItems: 'center', gap: '0.8rem' }}
+                  >
+                    <FolderArchive size={20} /> SIMPAN USAHA LEPAS
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {activeTab === 'arsip' && (
           <div className="fade-in" style={{ gridColumn: '1 / -1' }}>
             <ArchiveTab onContinueDraft={(draft) => {
@@ -289,14 +418,18 @@ function App() {
 
       <ChatAssistant />
 
-      <nav className="bottom-nav no-print">
+      <nav className="bottom-nav no-print" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <button className={`nav-item ${activeTab === 'sensus' ? 'active' : ''}`} onClick={() => setActiveTab('sensus')}>
           <span className="nav-icon"><Briefcase size={24} strokeWidth={1.5} /></span>
           <span className="nav-label">Sensus Terpadu</span>
         </button>
+        <button className={`nav-item ${activeTab === 'lepas' ? 'active' : ''}`} onClick={() => setActiveTab('lepas')}>
+          <span className="nav-icon"><ShoppingBag size={24} strokeWidth={1.5} /></span>
+          <span className="nav-label">Usaha Lepas</span>
+        </button>
         <button className={`nav-item ${activeTab === 'arsip' ? 'active' : ''}`} onClick={() => setActiveTab('arsip')}>
           <span className="nav-icon"><FolderArchive size={24} strokeWidth={1.5} /></span>
-          <span className="nav-label">Arsip (Draft & Final)</span>
+          <span className="nav-label">Arsip</span>
         </button>
       </nav>
     </div>
