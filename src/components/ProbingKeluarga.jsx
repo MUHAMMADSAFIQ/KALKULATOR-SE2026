@@ -4,7 +4,7 @@ import CurrencyInput from './CurrencyInput';
 import ActionMenu from './ActionMenu';
 import { formatCurrency, saveToArchive } from '../utils';
 
-export default function ProbingKeluarga({ initialData, onSaved }) {
+export default function ProbingKeluarga({ initialData, onSaved, saveTrigger, onCollectData }) {
   // Identitas & Administrasi (Optional/Header)
   const [namaKK, setNamaKK] = useState(initialData?.rawState?.namaKK ?? '');
   const [noBangunan, setNoBangunan] = useState(initialData?.rawState?.noBangunan ?? '');
@@ -359,8 +359,11 @@ export default function ProbingKeluarga({ initialData, onSaved }) {
           </ul>
         </div>
 
-        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+        <div style={{ display: 'none' }}>
+                <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+              </div>
       </div>
     </div>
   );
 }
+

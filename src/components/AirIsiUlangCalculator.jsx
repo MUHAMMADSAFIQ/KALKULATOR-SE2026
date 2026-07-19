@@ -6,7 +6,7 @@ import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
 import TahunBerdiriSelector from './TahunBerdiriSelector';
 
-export default function AirIsiUlangCalculator({ initialData, onSaved }) {
+export default function AirIsiUlangCalculator({ initialData, onSaved, saveTrigger, onCollectData }) {
   const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
   const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
   const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
@@ -131,3 +131,4 @@ export default function AirIsiUlangCalculator({ initialData, onSaved }) {
     </div>
   );
 }
+

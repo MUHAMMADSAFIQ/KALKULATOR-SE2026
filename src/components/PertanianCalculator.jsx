@@ -7,7 +7,7 @@ import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
 import TahunBerdiriSelector from './TahunBerdiriSelector';
 
-export default function PertanianCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
+export default function PertanianCalculator({ activeKbli, namaResponden , initialData, onSaved, saveTrigger, onCollectData }) {
   const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
   const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
   const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
@@ -153,6 +153,12 @@ export default function PertanianCalculator({ activeKbli, namaResponden , initia
     saveToArchive(buildRecord('final', catatan, namaRecord), initialData?.id);
     if(onSaved) onSaved();
   };
+  
+  React.useEffect(() => {
+    if (saveTrigger > 0 && onCollectData) {
+      onCollectData(buildRecord('final', '', namaResponden));
+    }
+  }, [saveTrigger]);
   
   const title = activeKbli?.name || "Kalkulator Usaha Pertanian";
 
@@ -429,7 +435,19 @@ export default function PertanianCalculator({ activeKbli, namaResponden , initia
                   </li>
                 </ul>
               </div>
-              <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+              <BusinessConclusion 
+                totalPendapatan={fasihTotalPendapatan} 
+                totalPengeluaran={fasihTotalPengeluaran} 
+              />
+              
+              {/* HIDE ACTION MENU SINCE WE HAVE GLOBAL SAVE */}
+              <div style={{ display: 'none' }}>
+                <ActionMenu 
+                  onSaveDraft={handleSaveDraft}
+                  onSaveFinal={handleSaveFinal}
+                  defaultName={namaResponden}
+                />
+              </div>
             </div>
           );
         })()}

@@ -94,54 +94,51 @@ export default function ArchiveTab({ onContinueDraft }) {
             <p style={{ color: 'var(--text-secondary)', marginTop: '1rem' }}>Belum ada data {tab === 'final' ? 'final' : 'draft'} yang tersimpan.</p>
           </div>
         ) : (
-          (tab === 'final' ? finalRecords : draftRecords).map((item, idx) => (
-            <div key={item.id} className="glass-card" style={{ padding: '1rem', borderLeft: `4px solid ${tab === 'final' ? 'var(--success)' : 'var(--warning)'}` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                    {new Date(item.timestamp).toLocaleString('id-ID')}
-                  </span>
-                  <h4 style={{ margin: '0.2rem 0', color: 'var(--text-primary)' }}>{item.namaDraft || item.namaResponden || 'Responden Tanpa Nama'}</h4>
-                  <span style={{ background: tab === 'final' ? 'var(--success)' : 'var(--warning)', color: tab === 'final' ? 'white' : 'black', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                    KBLI: {item.kbliCode} - {item.namaUsaha}
-                  </span>
-                  {item.catatan && (
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', fontStyle: 'italic' }}>
-                      Catatan: {item.catatan}
-                    </p>
-                  )}
+          (() => {
+            const currentRecords = tab === 'final' ? finalRecords : draftRecords;
+            // Group by namaResponden
+            const grouped = currentRecords.reduce((acc, curr) => {
+              const name = curr.namaResponden || 'Responden Tanpa Nama';
+              if (!acc[name]) acc[name] = [];
+              acc[name].push(curr);
+              return acc;
+            }, {});
+
+            return Object.entries(grouped).map(([name, items]) => (
+              <div key={name} className="glass-card" style={{ padding: '1.5rem', borderLeft: `4px solid ${tab === 'final' ? 'var(--success)' : 'var(--warning)'}` }}>
+                <h3 style={{ margin: '0 0 1rem 0', color: 'var(--accent-primary)', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>
+                  Keluarga: {name}
+                </h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {items.map(item => (
+                    <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-secondary)', padding: '0.8rem', borderRadius: '4px' }}>
+                      <div>
+                        <strong style={{ color: 'var(--text-primary)' }}>{item.namaUsaha}</strong>
+                        <span style={{ marginLeft: '0.5rem', background: 'rgba(255,255,255,0.1)', padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.75rem' }}>
+                          KBLI: {item.kbliCode}
+                        </span>
+                      </div>
+                      <div style={{ textAlign: 'right', fontSize: '0.85rem' }}>
+                        <span style={{ color: 'var(--text-secondary)' }}>Status: </span>
+                        <span style={{ color: tab === 'final' ? 'var(--success)' : 'var(--warning)', fontWeight: 'bold' }}>{item.status.toUpperCase()}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
                 
-                {tab === 'final' ? (
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Laba Bersih/Bln</span>
-                    <strong style={{ color: item.labaBersihBulan >= 0 ? 'var(--success)' : 'var(--danger)' }}>
-                      {formatCurrency(item.labaBersihBulan)}
-                    </strong>
-                    <button 
-                      className="action-btn"
-                      style={{ padding: '0.3rem 0.6rem', marginTop: '0.5rem', background: 'transparent', border: '1px solid var(--warning)', color: 'var(--warning)', fontSize: '0.75rem', display: 'flex', gap: '0.2rem', alignItems: 'center' }}
-                      onClick={() => {
-                        if (onContinueDraft) onContinueDraft(item);
-                      }}
-                    >
-                      <Play size={12} /> Edit
-                    </button>
-                  </div>
-                ) : (
+                <div style={{ marginTop: '1rem', textAlign: 'right' }}>
                   <button 
-                    className="action-btn"
-                    style={{ padding: '0.5rem 1rem', background: 'var(--warning)', color: 'black', fontWeight: 'bold', fontSize: '0.85rem' }}
-                    onClick={() => {
-                      if (onContinueDraft) onContinueDraft(item);
-                    }}
+                    className="action-btn no-print"
+                    style={{ padding: '0.5rem 1rem', background: 'transparent', border: '1px solid var(--accent-secondary)', color: 'var(--accent-secondary)' }}
+                    onClick={() => alert('Untuk mencetak PDF Arsip Terpadu Keluarga ini, pastikan data dimuat ke form utama lalu tekan "Cetak PDF" (Fitur muat ulang keluarga utuh sedang disempurnakan).')}
                   >
-                    <Play size={16} /> Lanjutkan
+                    <FileText size={16} /> Info Cetak PDF
                   </button>
-                )}
+                </div>
               </div>
-            </div>
-          ))
+            ));
+          })()
         )}
       </div>
     </div>

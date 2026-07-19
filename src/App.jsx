@@ -19,6 +19,10 @@ function App() {
   const [activeTab, setActiveTab] = useState('sensus'); // 'sensus', 'arsip'
   const [activeDraft, setActiveDraft] = useState(null);
 
+  // Global Save System
+  const [saveTrigger, setSaveTrigger] = useState(0);
+  const collectedDataRef = React.useRef([]);
+
   // Identitas Responden (Global)
   const [desa, setDesa] = useState('');
   const [rt, setRt] = useState('');
@@ -77,6 +81,35 @@ function App() {
 
   const getFullNamaResponden = () => {
     return `${namaResponden}${noBangunan ? ` - Bangunan ${noBangunan}` : ''}${desa ? ` - ${desa}` : ''}`;
+  };
+
+  const handleGlobalSave = () => {
+    if (!namaResponden) {
+      alert("Mohon isi Nama Kepala Keluarga / Responden terlebih dahulu!");
+      return;
+    }
+    // Prepare for collection
+    collectedDataRef.current = [];
+    setSaveTrigger(prev => prev + 1);
+    
+    // Check collected data after a short delay
+    setTimeout(() => {
+      const records = collectedDataRef.current;
+      if (records.length === 0) {
+        alert("Tidak ada data yang disimpan. Pastikan Anda telah menambahkan minimal 1 usaha atau mengisi Probing Keluarga.");
+        return;
+      }
+      
+      // We will save them individually but they share the same namaResponden
+      import('./utils').then(({ saveToArchive }) => {
+        records.forEach(r => saveToArchive(r));
+        alert("BERHASIL! Seluruh data keluarga dan usaha berhasil diarsipkan.");
+      });
+    }, 500);
+  };
+
+  const handleCollectData = (data) => {
+    if (data) collectedDataRef.current.push(data);
   };
 
   return (
@@ -194,6 +227,7 @@ function App() {
                 <div key={`${kbliId}-${index}`} style={{ animation: 'fadeIn 0.5s ease', marginTop: '0.5rem' }}>
                   <div 
                     onClick={() => toggleAccordion(index)}
+                    className="print-hide"
                     style={{ background: isOpen ? 'var(--accent-primary)' : 'var(--bg-secondary)', color: isOpen ? 'white' : 'var(--text-primary)', padding: '1rem', borderRadius: '8px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', border: isOpen ? 'none' : '1px solid var(--glass-border)' }}
                   >
                     <span>Usaha #{index + 1}: {activeKbli.name}</span>
@@ -210,12 +244,13 @@ function App() {
                     </div>
                   </div>
                   
-                  <div style={{ display: isOpen ? 'block' : 'none', marginTop: '-0.5rem', paddingTop: '0.5rem' }}>
-                    {isPertanian ? <PertanianCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                     isPeternakan ? <PeternakanCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                     isIndustriTempe ? <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                     isWarung ? <WarungCalculator activeKbli={activeKbli} namaResponden={fullNama} /> :
-                     <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={fullNama} title={activeKbli.name} />}
+                  <div className="print-force-show" style={{ display: isOpen ? 'block' : 'none', marginTop: '-0.5rem', paddingTop: '0.5rem' }}>
+                    <div className="print-only" style={{ display: 'none', fontWeight: 'bold', color: 'black', margin: '1rem 0' }}>Usaha: {activeKbli.name}</div>
+                    {isPertanian ? <PertanianCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
+                     isPeternakan ? <PeternakanCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
+                     isIndustriTempe ? <IndustriTempeCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
+                     isWarung ? <WarungCalculator activeKbli={activeKbli} namaResponden={fullNama} saveTrigger={saveTrigger} onCollectData={handleCollectData} /> :
+                     <GenericBusinessCalculator activeKbli={activeKbli} namaResponden={fullNama} title={activeKbli.name} saveTrigger={saveTrigger} onCollectData={handleCollectData} />}
                   </div>
                 </div>
               );
@@ -226,7 +261,18 @@ function App() {
               <div style={{ background: '#f59e0b', color: 'white', padding: '0.5rem 1rem', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Users size={18} /> Blok Probing Pengeluaran & Aset Keluarga
               </div>
-              <ProbingKeluarga namaResponden={getFullNamaResponden()} />
+              <ProbingKeluarga namaResponden={getFullNamaResponden()} saveTrigger={saveTrigger} onCollectData={handleCollectData} />
+            </div>
+
+            {/* GLOBAL SAVE BUTTON */}
+            <div className="no-print" style={{ marginTop: '2rem', textAlign: 'center' }}>
+              <button 
+                onClick={handleGlobalSave}
+                style={{ background: 'var(--success)', color: 'white', border: 'none', padding: '1rem 2rem', borderRadius: '8px', fontSize: '1.2rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.3)', display: 'inline-flex', alignItems: 'center', gap: '0.8rem' }}
+              >
+                <FolderArchive size={24} /> SIMPAN & ARSIPKAN SENSUS KELUARGA
+              </button>
+              <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem', fontSize: '0.9rem' }}>Sekali klik, seluruh form usaha dan keluarga akan dibundel ke arsip.</p>
             </div>
             
           </div>

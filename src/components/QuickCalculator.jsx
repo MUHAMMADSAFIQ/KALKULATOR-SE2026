@@ -6,7 +6,7 @@ import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
 import TahunBerdiriSelector from './TahunBerdiriSelector';
 
-export default function QuickCalculator({ activeKbli, namaResponden , initialData, onSaved }) {
+export default function QuickCalculator({ activeKbli, namaResponden , initialData, onSaved, saveTrigger, onCollectData }) {
   const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
   const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
   const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
@@ -124,7 +124,9 @@ export default function QuickCalculator({ activeKbli, namaResponden , initialDat
           
       <>
         <BusinessConclusion namaResponden={typeof namaResponden !== 'undefined' ? namaResponden : ''} namaUsaha={typeof activeKbli !== 'undefined' && activeKbli?.name ? activeKbli.name : 'usaha ini'}  totalIncome={income} totalExpense={expense} netProfitTahunan={labaTahun}  expenseDetails={[{name: 'Pengeluaran/Biaya Operasional', value: parseFloat(pengeluaran || 0) * (periode === 'Hari' ? 30 : (periode === 'Minggu' ? 4 : 1)) }]} />
-        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+        <div style={{ display: 'none' }}>
+                <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+              </div>
         {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
       </>
     
@@ -133,3 +135,4 @@ export default function QuickCalculator({ activeKbli, namaResponden , initialDat
     </div>
   );
 }
+

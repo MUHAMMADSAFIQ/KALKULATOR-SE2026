@@ -7,7 +7,7 @@ import ActionMenu from './ActionMenu';
 import BusinessConclusion from './BusinessConclusion';
 import TahunBerdiriSelector from './TahunBerdiriSelector';
 
-export default function GenericBusinessCalculator({ activeKbli, namaResponden, title = "Usaha Umum / Lainnya" , initialData, onSaved }) {
+export default function GenericBusinessCalculator({ activeKbli, namaResponden, title = "Usaha Umum / Lainnya" , initialData, onSaved, saveTrigger, onCollectData }) {
   const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
   const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
   const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
@@ -141,7 +141,9 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
           
       <>
         
-        <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+        <div style={{ display: 'none' }}>
+                <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+              </div>
         {/* INJECTED_FUNCTIONS_PLACEHOLDER */}
       </>
     
@@ -150,3 +152,4 @@ export default function GenericBusinessCalculator({ activeKbli, namaResponden, t
     </div>
   );
 }
+

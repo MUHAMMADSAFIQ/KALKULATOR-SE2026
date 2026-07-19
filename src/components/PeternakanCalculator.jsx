@@ -6,7 +6,7 @@ import { formatCurrency, saveToArchive } from '../utils';
 import ActionMenu from './ActionMenu';
 import TahunBerdiriSelector from './TahunBerdiriSelector';
 
-export default function PeternakanCalculator({ activeKbli, namaResponden, initialData, onSaved }) {
+export default function PeternakanCalculator({ activeKbli, namaResponden, initialData, onSaved, saveTrigger, onCollectData }) {
   const [tahunBerdiri, setTahunBerdiri] = useState(initialData?.rawState?.tahunBerdiri ?? '<=2025');
   const [bulanBerdiri, setBulanBerdiri] = useState(initialData?.rawState?.bulanBerdiri ?? 1);
   const bulanOperasi = tahunBerdiri === '2026' ? (12 - parseInt(bulanBerdiri) + 1) : 12;
@@ -284,7 +284,9 @@ export default function PeternakanCalculator({ activeKbli, namaResponden, initia
                   </li>
                 </ul>
               </div>
-              <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+              <div style={{ display: 'none' }}>
+                <ActionMenu onSaveDraft={handleSaveDraft} onSaveFinal={handleSaveFinal} />
+              </div>
             </div>
           );
         })()}
@@ -292,3 +294,4 @@ export default function PeternakanCalculator({ activeKbli, namaResponden, initia
     </div>
   );
 }
+

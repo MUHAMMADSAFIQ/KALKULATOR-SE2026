@@ -516,3 +516,16 @@ h1, h2, h3, h4, h5, h6 {
 .app-container {
   padding-bottom: 90px !important;
 }
+
+@media print {
+  .accordion-content { display: block !important; }
+  .glass-card > div[style*='display: none'] { display: block !important; }
+  .action-btn { display: none !important; }
+}
+
+
+@media print {
+  .print-force-show { display: block !important; }
+  .print-hide { display: none !important; }
+}
+
